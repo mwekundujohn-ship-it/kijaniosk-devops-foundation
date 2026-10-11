@@ -1,27 +1,19 @@
 # Delivery Notes
 
-<!-- Explain how Flow, Feedback, and Learning appear in YOUR workflow.
-     Use the branch/PR structure of this repo as evidence. -->
-
 ## Flow
 
-<!-- How does work move smoothly? Mention: work on a feature branch,
-     small commits, keep changes small, merge via Pull Request so nothing
-     piles up. -->
+Work moves in small, frequent changes made on a feature branch, then merged through a Pull Request. Keeping each change small and merging regularly means nothing piles up and the main line of work keeps moving.
 
 ## Feedback
 
-<!-- How do you get fast signals? Mention: Pull Request review, checking the
-     diff, and (if set up) CI checks running on push. Fixing issues before merge. -->
+Fast signals come from Pull Request review and from checking the diff before merge. Where CI is set up, it runs automatically on push, so issues are caught and fixed before the change reaches `develop`.
 
 ## Learning
 
-<!-- How do you improve? Mention: reviewing the PR, reflecting on what went
-     well / what to change, and carrying that into the next change. -->
+We improve by reviewing each PR and reflecting on what went well and what to change next time. That reflection is carried straight into the next change, so the process gets a little better each round.
 
 ## Reflection
 
-<!-- Answer these from the brief in your own words:
-- Where were you tempted to take shortcuts?
-- Which architectural decision needed the most reasoning?
-- If KijaniKiosk grows a lot, what would you improve first? -->
+- Tempted to take shortcuts by committing directly to `main` instead of going through a feature branch and Pull Request.
+- The architectural decision that needed the most reasoning was the cloud service model, because it sets the direction for everything else.
+- The first thing to improve as KijaniKiosk grows is automating with CI/CD and adding proper monitoring.

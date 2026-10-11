@@ -2,18 +2,18 @@
 
 ## Principle
 
-<!-- 1-2 sentences: define least privilege in your own words. -->
+Least privilege means giving an identity only the permissions it needs, on only the resources it needs, for only as long as it needs them. Nothing more, and nothing that is not strictly required for its job.
 
 ## The application task
 
-<!-- 1-2 sentences: describe ONE clear task. Example: "The KijaniKiosk product
-     service needs to read product images from an S3 bucket." -->
+The KijaniKiosk product service needs to read product images from an S3 bucket. It only ever fetches images; it does not add, change, or delete them.
 
 ## Why this is least privilege
 
-<!-- 2-3 bullets: exact action only (s3:GetObject, not s3:*), scoped resource
-     (one bucket / one prefix, not *), no delete/write permissions,
-     role-based (no long-lived keys). -->
+- Exact action only: `s3:GetObject`, never the wildcard `s3:*`.
+- Scoped resource: a single bucket (and its objects), not `*`.
+- No write, delete, or list permissions are granted.
+- Access is role-based, so there are no long-lived credentials to leak.
 
 ## The policy
 
@@ -30,6 +30,3 @@
   ]
 }
 ```
-
-<!-- Adjust the bucket name/resource above to match YOUR described task.
-     If your task is different, change the Action and Resource accordingly. -->
