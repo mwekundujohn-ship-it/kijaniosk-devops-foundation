@@ -1,0 +1,67 @@
+
+2026-10-11T14:46:40+03:00 ===== Phase 1: Preflight and package reconciliation =====
+2026-10-11T14:46:40+03:00 INFO   running on kali as root
+2026-10-11T14:46:40+03:00 WARN   version drift: nginx installed=1.30.4-3 candidate=1.30.4-7 (not downgrading)
+
+2026-10-11T14:46:40+03:00 ===== Phase 2: Service accounts and group =====
+2026-10-11T14:46:40+03:00 INFO   already exists: group kijaniosk
+2026-10-11T14:46:40+03:00 INFO   Already exists: kk-api (UID 998) - converging to spec
+2026-10-11T14:46:40+03:00 INFO   Already exists: kk-payments (UID 999) - converging to spec
+2026-10-11T14:46:41+03:00 INFO   Already exists: kk-logs (UID 996) - converging to spec
+
+2026-10-11T14:46:41+03:00 ===== Phase 3: Directory structure and ACL model =====
+2026-10-11T14:46:41+03:00 INFO   tightened /opt/kijaniosk/config to 0750 (was world-writable)
+
+2026-10-11T14:46:41+03:00 ===== Phase 4: Configuration files =====
+
+2026-10-11T14:46:41+03:00 ===== Phase 5: Firewall =====
+2026-10-11T14:46:45+03:00 PASS   PASS: SSH (22) allowed
+2026-10-11T14:46:45+03:00 PASS   PASS: HTTP (80) allowed
+2026-10-11T14:46:45+03:00 PASS   PASS: HTTPS (443) allowed
+2026-10-11T14:46:45+03:00 PASS   PASS: payments health from subnet allowed
+2026-10-11T14:46:45+03:00 PASS   PASS: port 3001 external deny present
+2026-10-11T14:46:45+03:00 PASS   PASS: loopback allow present
+
+2026-10-11T14:46:45+03:00 ===== Phase 6: systemd units =====
+2026-10-11T14:46:45+03:00 INFO   wrote /etc/systemd/system/kk-api.service
+2026-10-11T14:46:45+03:00 INFO   wrote /etc/systemd/system/kk-payments.service
+2026-10-11T14:46:45+03:00 INFO   wrote /etc/systemd/system/kk-logs.service
+2026-10-11T14:46:46+03:00 PASS   PASS: kk-api started
+2026-10-11T14:46:46+03:00 PASS   PASS: kk-payments started
+2026-10-11T14:46:47+03:00 PASS   PASS: kk-logs started
+
+2026-10-11T14:46:47+03:00 ===== Phase 7: Journal persistence and log rotation =====
+2026-10-11T14:46:47+03:00 INFO   journal configured: persistent, capped at 500M
+2026-10-11T14:46:47+03:00 INFO   wrote /etc/logrotate.d/kijaniosk
+2026-10-11T14:46:47+03:00 PASS   PASS: logrotate --debug clean
+
+2026-10-11T14:46:47+03:00 ===== Phase 8: Monitoring health checks =====
+2026-10-11T14:46:47+03:00 PASS   wrote health check /opt/kijaniosk/health/last-provision.json
+{"timestamp":"2026-10-11T14:46:47+03:00","kk-api":"ok","kk-payments":"ok","kk-logs":"ok"}
+
+2026-10-11T14:46:47+03:00 ===== Final verification =====
+
+CHECK                                         RESULT
+-----                                         ------
+packages-pinned                               PASS
+account-kk-api                                PASS
+account-kk-payments                           PASS
+account-kk-logs                               PASS
+acl-kk-payments-on-logs                       PASS
+default-acl-present                           PASS
+config-not-world-writable                     PASS
+env-readable-kk-api                           PASS
+env-readable-kk-payments                      PASS
+env-readable-kk-logs                          PASS
+firewall-rules                                PASS
+unit-active-kk-api                            PASS
+unit-active-kk-payments                       PASS
+unit-active-kk-logs                           PASS
+logrotate-debug                               PASS
+journald-persistent                           PASS
+journald-500m                                 PASS
+health-json-exists                            PASS
+health-json-readable-by-group                 PASS
+
+Total checks: 19   Failures: 0
+2026-10-11T14:46:47+03:00 PASS   ALL CHECKS PASSED
