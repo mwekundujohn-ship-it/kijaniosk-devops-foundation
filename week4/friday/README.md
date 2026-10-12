@@ -1,4 +1,4 @@
-# Week 4 — IaC Pipeline (Friday)
+# Week 4: IaC Pipeline (Friday)
 
 Terraform provisions, Ansible configures, one script ties them together.
 
@@ -18,7 +18,7 @@ the Multipass code path and accepts `multipass` as an argument. See
 | `pipeline.sh` | Terraform apply -> extract IPs -> write `inventory.ini` -> Ansible. Exits non-zero on failure. |
 | `pipeline-run1.log` | First run: Terraform creates 6 resources, Ansible `changed=18` per host. |
 | `pipeline-run2.log` | Second run: Terraform `0 added, 0 changed, 0 destroyed`, Ansible `changed=0`. |
-| `hardening-decisions.md` | The Nia document (881 words, 12-row control table, honest gaps). |
+| `hardening-decisions.md` | The Nia-facing document: 12-row control table and honest gaps. |
 | `destroy-output.txt` | `terraform destroy` proving clean teardown (6 destroyed). |
 | `environment-setup.md` | Tool versions and reproducibility notes. |
 | `verification-output.txt` | Post-run evidence: services active, scores 1.2, Challenge D, ACLs, journal. |

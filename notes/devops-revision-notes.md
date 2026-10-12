@@ -1,4 +1,4 @@
-# DevOps Week 1 — Revision Notes (Dalton Wambui)
+# DevOps Week 1: Revision Notes (Dalton Wambui)
 
 Study notes for the KijaniKiosk DevOps Foundation project. These explain the
 concepts; the submitted files in `starter-kit/` should be written in my own words.
@@ -14,13 +14,13 @@ and runs the software.
 
 The **Three Ways** (Gene Kim) describe DevOps thinking:
 
-- **Flow** — work should move smoothly and quickly from a developer's laptop to
+- **Flow**: work should move smoothly and quickly from a developer's laptop to
   production. We do this by working in small batches, using short-lived branches,
   Pull Requests, and CI/CD pipelines so nothing sits waiting.
-- **Feedback** — we want fast signals about whether our change is good or bad.
+- **Feedback**: we want fast signals about whether our change is good or bad.
   Examples: automated tests running on every push, code review comments, monitoring
   and alerting in production, error logs. Fast feedback = fix problems early.
-- **Learning** — we continuously improve. Blameless post-mortems after incidents,
+- **Learning**: we continuously improve. Blameless post-mortems after incidents,
   sharing knowledge, experimenting, and feeding lessons back into the process.
 
 **Evidence of the Three Ways in a Git workflow:**
@@ -32,7 +32,7 @@ The **Three Ways** (Gene Kim) describe DevOps thinking:
 
 ## 2. Cloud Service Models (IaaS / PaaS / SaaS)
 
-Think of it as a **"how much do I manage vs. how much does the provider manage"**
+One way to picture it is a **"how much do I manage vs. how much does the provider manage"**
 spectrum.
 
 | Model | You rent | You manage | Provider manages | AWS example |
@@ -41,9 +41,9 @@ spectrum.
 | **PaaS** (Platform as a Service) | A ready-to-run platform/runtime | Just your app + data | OS, runtime, patching, scaling | Elastic Beanstalk, Heroku, App Engine, RDS |
 | **SaaS** (Software as a Service) | Finished software | Nothing (only config/data) | Everything | Gmail, Shopify, Salesforce |
 
-**Rule of thumb:** moving IaaS -> PaaS -> SaaS = *less control, less work*.
+**Short version:** moving IaaS -> PaaS -> SaaS = *less control, less work*.
 
-**Reasoning framework for a startup:** a small team should not spend time on
+**Why this matters for a startup:** a small team should not spend time on
 "undifferentiated heavy lifting" (patching servers, tuning databases). Prefer
 managed services (PaaS) for the app and database, SaaS for commodities (email,
 monitoring, payments), and IaaS only where you truly need control.
@@ -80,7 +80,7 @@ which services are available, cost, and disaster-recovery needs.
 - **Least privilege** = give an identity ONLY the permissions it needs, on ONLY the
   resources it needs, for ONLY as long as it needs. Nothing more.
 
-**Best practices:**
+**Good practice:**
 - Prefer **roles** over long-lived access keys.
 - Name exact **actions** (`s3:GetObject`) instead of wildcards (`s3:*`) where possible.
 - Scope **resources** (a specific bucket/prefix, not `*`).
@@ -104,8 +104,8 @@ allow only `s3:GetObject` on `arn:aws:s3:::my-bucket/uploads/*`.
   private is which route table (and whether it points at the IGW).
 
 **Two layers of firewalls:**
-- **Security Groups** — instance-level, stateful, allow rules only.
-- **NACLs** — subnet-level, stateless, allow and deny rules.
+- **Security Groups**: instance-level, stateful, allow rules only.
+- **NACLs**: subnet-level, stateless, allow and deny rules.
 
 **Typical 3-tier layout:** internet -> **public subnet** (Load Balancer) ->
 **private subnet** (application) -> **private subnet** (database). Only the load

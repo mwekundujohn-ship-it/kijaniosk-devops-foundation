@@ -10,7 +10,7 @@ directory and the logrotate interaction).
 
 | Identity | UID | Type | Shell | Purpose |
 |----------|-----|------|-------|---------|
-| `kijaniosk` | 981 | system group | — | shared group for all KijaniKiosk service accounts |
+| `kijaniosk` | 981 | system group | - | shared group for all KijaniKiosk service accounts |
 | `kk-api` | 998 | system user | `/usr/sbin/nologin` | runs the API service (port 3000) |
 | `kk-payments` | 999 | system user | `/usr/sbin/nologin` | runs the payments service (port 3001) |
 | `kk-logs` | 996 | system user | `/usr/sbin/nologin` | runs the logging service (port 3002) |
@@ -60,11 +60,11 @@ correlation); nobody else has access.
 logrotate recreates the log file after rotation using the config's `create`
 directive. Two details matter:
 
-1. `create 0660 root kijaniosk` — the mode's **group bits become the ACL mask**.
+1. `create 0660 root kijaniosk`: the mode's **group bits become the ACL mask**.
    Using `0640` would set the mask to `r--`, silently leaving `kk-api` unable to
    *write* the rotated file. `0660` keeps `rw` in the mask so the default ACLs
    grant `kk-api`/`kk-logs` write access on the new file.
-2. `su root kijaniosk` — because `shared/logs` is group-writable as part of the
+2. `su root kijaniosk`: because `shared/logs` is group-writable as part of the
    ACL model, logrotate refuses to run without an explicit `su` directive.
 
 Verified after a forced rotation:
@@ -88,5 +88,5 @@ and `sudo -u kk-api` can write to the recreated file (see
 - **Who reads:** the `kijaniosk` group (members `kk-api`, `kk-payments`,
   `kk-logs`), so the monitoring system reads it without sudo. Amina's regular
   user reads it by being added to `kijaniosk` (or an explicit read ACL).
-- **ACLs:** none needed — standard group read is sufficient, and the file is
+- **ACLs:** none needed, standard group read is sufficient, and the file is
   short-lived (overwritten every run).

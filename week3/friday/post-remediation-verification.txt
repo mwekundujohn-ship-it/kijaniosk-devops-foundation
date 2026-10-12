@@ -1,4 +1,4 @@
-# Post-remediation verification — 2026-10-11T14:46:47+03:00
+# Post-remediation verification: 2026-10-11T14:46:47+03:00
 
 ## 0. put content in the logs so 'notifempty' does not skip rotation
 total 36

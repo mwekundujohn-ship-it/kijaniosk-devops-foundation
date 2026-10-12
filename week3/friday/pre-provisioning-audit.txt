@@ -1,40 +1,40 @@
-# KijaniKiosk — Pre-Provisioning Audit
+# KijaniKiosk: Pre-Provisioning Audit
 
-Interpretation of the dirty state inherited from Tue–Thu labs. Each condition is
+Interpretation of the dirty state inherited from the Tue to Thu labs. Each condition is
 handled explicitly by `kijaniosk-provision.sh` (not silently ignored).
 
 ## Expected dirty conditions found in pre-provisioning audit
 
-1. **Service accounts already exist** — `kk-api` (UID 998), `kk-payments` (UID 999),
+1. **Service accounts already exist**: `kk-api` (UID 998), `kk-payments` (UID 999),
    `kk-logs` (UID 996) were created by hand on Tuesday, all in group `kijaniosk`
    (GID 981). They also have unwanted home paths (`/home/kk-*`).
    *Handled in Phase 2* by an existence/id check that converges the accounts to spec
    (group membership, no login shell, lock the account) instead of blindly re-adding.
 
-2. **`/opt/kijaniosk/config` is world-writable (`drwxrwxrwx`)** — left open during
+2. **`/opt/kijaniosk/config` is world-writable (`drwxrwxrwx`)**: left open during
    Wednesday debugging. *Fixed in Phase 3* by tightening it to `0750 root:kijaniosk`.
 
-3. **`/opt/kijaniosk/shared/logs` ACLs are incomplete** — the `kk-payments` read entry
+3. **`/opt/kijaniosk/shared/logs` ACLs are incomplete**: the `kk-payments` read entry
    is missing and there are **no default ACLs**, so files created later would not
    inherit the access model. *Fixed in Phase 3* by applying the full named-user ACLs
    plus default (`-d`) ACLs.
 
-4. **`ufw` ruleset reflects history, not intent** — only `SSH` is allowed, plus a
+4. **`ufw` ruleset reflects history, not intent**: only `SSH` is allowed, plus a
    stray `3001 DENY` rule added during Thursday remediation, and the remaining rules
    have no meaningful comments. *Reset in Phase 5* to a known baseline and rebuilt
    from intent.
 
-5. **Stray package hold** — `apt-mark showhold` reports `curl` is on hold (a hold the
+5. **Stray package hold**: `apt-mark showhold` reports `curl` is on hold (a hold the
    week's script may have set). *Handled in Phase 1* by reconciling holds against the
    intended pin set.
 
-6. **`kk-api.service` exists as the weak Wednesday unit** — no hardening at all,
+6. **`kk-api.service` exists as the weak Wednesday unit**: no hardening at all,
    `systemd-analyze security` reports **9.2 UNSAFE**. It is `disabled`.
    *Rewritten in Phase 6* with full hardening for all three services.
 
 ## Raw audit output
 
-### KijaniKiosk pre-provisioning audit — run 2026-10-11T14:37:52+03:00
+### KijaniKiosk pre-provisioning audit: run 2026-10-11T14:37:52+03:00
 
 $ getent passwd kk-api kk-payments kk-logs
 kk-api:x:998:981::/home/kk-api:/usr/sbin/nologin

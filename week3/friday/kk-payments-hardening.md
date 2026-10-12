@@ -1,4 +1,4 @@
-# kk-payments.service — hardening log
+# kk-payments.service: hardening log
 
 Target: exposure score **< 2.5** (stretch < 2.0). Starting point: **9.2 UNSAFE**.
 
@@ -17,22 +17,22 @@ Each row was applied, reloaded, and re-scored with
 | 5 | `IPAddressDeny=any` + `IPAddressAllow=localhost`, `10.0.1.0/24` | 1.3 |
 | 6 | tighten `SystemCallFilter` (`~@mount @debug @cpu-emulation @swap @clock`) | **1.2 OK** |
 
-Result: **1.2** — well inside both the < 2.5 target and the < 2.0 stretch goal.
+Result: **1.2**, well inside both the < 2.5 target and the < 2.0 stretch goal.
 
 ## Directives I evaluated and rejected
 
-1. **`DynamicUser=yes`** — would allocate an ephemeral UID at each start.
+1. **`DynamicUser=yes`**: would allocate an ephemeral UID at each start.
    Rejected because payments must own `/opt/kijaniosk/config/payments-api.env`
    and write stable log files; a dynamic UID cannot own persistent files across
    restarts, which would break the EnvironmentFile and the ACL model.
 
-2. **`PrivateNetwork=yes`** — would give the unit a network namespace with only
+2. **`PrivateNetwork=yes`**: would give the unit a network namespace with only
    `lo`. Rejected because kk-payments must `IPAddressAllow` the internal
    `10.0.1.0/24` tier; cutting it off from the network contradicts the service's
    purpose. I kept `IPAddressDeny=any` + explicit `IPAddressAllow` instead,
    which restricts *egress* without removing connectivity.
 
-3. **`ProtectSystem=full`** (instead of `strict`) — rejected as weaker: `full`
+3. **`ProtectSystem=full`** (instead of `strict`): rejected as weaker: `full`
    leaves `/usr` read-only only, whereas `strict` makes the whole filesystem
    read-only except `ReadWritePaths`. `strict` is the stronger of the two and
    cost nothing once `ReadWritePaths` was declared.

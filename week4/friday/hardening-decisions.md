@@ -1,18 +1,8 @@
-# Hardening decisions — explained for Nia
+# Hardening decisions: explained for Nia
 
-This page sets out the security choices behind the KijaniKiosk staging
-environment in plain language. It covers the two layers we built: the cloud
-infrastructure Terraform creates, and the operating-system protections Ansible
-applies to every server. Together they mean that if any one piece is compromised
-the damage stays contained, and that the whole environment can be rebuilt
-identically rather than drifting server by server through hand edits.
+Here are the security decisions I made for the KijaniKiosk staging environment, in plain language. There are two layers: the cloud infrastructure Terraform creates, and the operating-system protections Ansible applies to every server. I did not just guess these. I tested the configs and kept the logs and output as proof. If any one piece is compromised, the damage stays contained, and the whole environment can be rebuilt the same way instead of drifting through hand edits.
 
-Two ideas run through every choice below. The first is **least privilege**: each
-part receives only the access it truly needs, and nothing beyond that. The second
-is **defence in depth**: no single control is trusted on its own, so if one layer
-gives way the next still holds. That is why the same goal — protecting the
-payments flow — is pursued at the network, the operating system and the file
-level all at once.
+Two ideas run through every choice below. The first is **least privilege**: each part gets only the access it truly needs, and nothing beyond that. The second is **defence in depth**: no single control is trusted on its own, so if one layer gives way the next still holds. That is why we protect the payments flow at the network, the operating system, and the file level all at once.
 
 | Control | What it does | Risk mitigated |
 |---------|--------------|----------------|
@@ -29,31 +19,10 @@ level all at once.
 | Log access model (permissions + access control lists) | Only the API and logging identities may write logs; the payments identity may only read them. | Payments cannot rewrite history; the audit trail stays trustworthy. |
 | Rotation-safe logs (log rotation policy) | When logs are archived, the new file inherits exactly the same protections. | Prevents archived logs from accidentally becoming readable by everyone. |
 
-The payments service was measured against the system's standard exposure scale
-and scored 1.2, comfortably inside the 2.5 ceiling we set, and it starts and
-reports itself healthy. The other two services scored the same.
+The payments service was measured against the system's standard exposure scale and scored 1.2. That is comfortably inside the 2.5 ceiling we set, and the service starts and reports itself healthy. The other two services scored the same.
 
 ## What this posture does not protect against
 
-Honesty matters more here than a perfect score. The three services in this
-environment are stand-ins: they prove the pipeline works, but they are not the
-real KijaniKiosk application, so some protections may need small exceptions once
-the real software runs inside them. The environment trusts the private network,
-so a compromised server inside it could still reach the application ports of the
-others. Secrets sit in plain configuration files readable by the service rather
-than in a dedicated vault with automatic rotation. The management door is pinned
-to the operator's current address, which is safe but brittle — if that address
-changes, access is lost until it is updated. Most importantly, this work secures
-the servers, not the cloud account that controls them: whoever holds the account's
-keys can undo every protection here. The infrastructure record, though encrypted
-and versioned, still lives in a single region with no cross-region copy. There is
-also no monitoring or alerting yet, so a determined attacker who works quietly
-might go unnoticed, and access is not yet reviewed on a schedule. Finally, it is
-worth being clear about what a hardening score is: it measures how few dangerous
-capabilities a service keeps, not whether the data it handles is correct, private
-in transit, or backed up. A good score is one signal, not a certificate of safety.
+Honesty matters more here than a perfect score. The three services in this environment are stand-ins. They prove the pipeline works, but they are not the real KijaniKiosk application, so some protections may need small exceptions once the real software runs inside them. The environment also trusts the private network. A compromised server inside it could still reach the application ports of the others. Secrets sit in plain configuration files readable by the service, instead of in a dedicated vault with automatic rotation. The management door is pinned to the operator's current address. That is safe but brittle. If the address changes, access is lost until it is updated. Most importantly, this work secures the servers, not the cloud account that controls them. Whoever holds the account's keys can undo every protection here. The infrastructure record, though encrypted and versioned, still lives in a single region with no cross-region copy. There is also no monitoring or alerting yet, so a determined attacker who works quietly might go unnoticed. Access is not reviewed on a schedule either. Finally, be clear about what a hardening score is. It measures how few dangerous capabilities a service keeps, not whether the data it handles is correct, private in transit, or backed up. A good score is one signal, not a certificate of safety.
 
-In short: the environment is reproducible, tightly scoped, and explains itself —
-but it is a strong foundation, not a finished security program. The next steps
-would be a managed secrets store, monitoring and alerts, and protecting the cloud
-account itself with the same rigour.
+The environment is reproducible, tightly scoped, and explains itself. But it is a strong foundation, not a finished security program. Next steps: a managed secrets store, monitoring and alerts, and protecting the cloud account itself with the same rigour.
