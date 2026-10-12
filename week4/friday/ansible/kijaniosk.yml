@@ -1,0 +1,191 @@
+---
+# Configures every KijaniKiosk server from a blank Ubuntu 22.04 install to the
+# same state the Week 3 provisioning script produced, across all seven phases.
+# Fully idempotent: a second run reports changed=0.
+- name: Configure KijaniKiosk servers to the Week 3 production standard
+  hosts: kijaniosk
+  become: true
+  gather_facts: true
+
+  tasks:
+    # ------------------------------------------------------------------
+    # Phase 1 - packages
+    # ------------------------------------------------------------------
+    - name: Phase 1 | install base packages
+      ansible.builtin.apt:
+        name: "{{ base_packages }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    # ------------------------------------------------------------------
+    # Phase 2 - service accounts
+    # ------------------------------------------------------------------
+    - name: Phase 2 | ensure the kijaniosk group exists
+      ansible.builtin.group:
+        name: "{{ kijaniosk_group }}"
+        state: present
+
+    - name: Phase 2 | ensure the service accounts exist
+      ansible.builtin.user:
+        name: "{{ item }}"
+        group: "{{ kijaniosk_group }}"
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+        password_lock: true
+        state: present
+      loop: "{{ service_accounts }}"
+
+    # ------------------------------------------------------------------
+    # Phase 3 - directory structure and access model
+    # ------------------------------------------------------------------
+    - name: Phase 3 | create application directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: root
+        group: "{{ kijaniosk_group }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { path: "{{ app_root }}",     mode: "0750" }
+        - { path: "{{ config_dir }}",   mode: "0750" }
+        - { path: "{{ releases_dir }}", mode: "0750" }
+        - { path: "{{ health_dir }}",   mode: "0750" }
+        - { path: "{{ logs_dir }}",     mode: "2770" }
+
+    - name: Phase 3 | set named ACLs on the shared logs directory
+      ansible.posix.acl:
+        path: "{{ logs_dir }}"
+        entity: "{{ item.user }}"
+        etype: user
+        permissions: "{{ item.perms }}"
+        state: present
+      loop: "{{ logs_acl_users }}"
+
+    - name: Phase 3 | set default ACLs on the shared logs directory
+      ansible.posix.acl:
+        path: "{{ logs_dir }}"
+        entity: "{{ item.user }}"
+        etype: user
+        permissions: "{{ item.default_perms }}"
+        default: true
+        state: present
+      loop: "{{ logs_acl_users }}"
+
+    - name: Phase 3 | seed the log files if they do not exist
+      ansible.builtin.copy:
+        content: "kijaniosk bootstrap log entry\n"
+        dest: "{{ logs_dir }}/{{ item }}.log"
+        owner: root
+        group: "{{ kijaniosk_group }}"
+        mode: "0660"
+        force: false
+      loop: [api, payments, logs]
+
+    # ------------------------------------------------------------------
+    # Phase 4 - systemd unit files (templates + handlers)
+    # ------------------------------------------------------------------
+    - name: Phase 4 | deploy the systemd unit
+      ansible.builtin.template:
+        src: kk-unit.service.j2
+        dest: "/etc/systemd/system/{{ service_name }}.service"
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - reload systemd
+        - restart kijaniosk service
+
+    - name: Phase 4 | deploy the service environment file
+      ansible.builtin.template:
+        src: env.j2
+        dest: "{{ config_dir }}/{{ app_role }}-api.env"
+        owner: root
+        group: "{{ kijaniosk_group }}"
+        mode: "0640"
+      notify: restart kijaniosk service
+
+    - name: Phase 4 | deploy the health report
+      ansible.builtin.template:
+        src: health.json.j2
+        dest: "{{ health_dir }}/{{ server_name }}.json"
+        owner: kk-logs
+        group: "{{ kijaniosk_group }}"
+        mode: "0640"
+
+    # ------------------------------------------------------------------
+    # Phase 5 - firewall (allow rules first so enabling never locks us out)
+    # ------------------------------------------------------------------
+    - name: Phase 5 | allow SSH from the operator
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+        src: "{{ admin_cidr }}"
+
+    - name: Phase 5 | allow the application port from inside the VPC
+      community.general.ufw:
+        rule: allow
+        port: "{{ app_port }}"
+        proto: tcp
+        src: "{{ internal_cidr }}"
+
+    - name: Phase 5 | set default firewall policies and enable
+      community.general.ufw:
+        state: enabled
+        policy: "{{ item.policy }}"
+        direction: "{{ item.direction }}"
+      loop:
+        - { policy: deny,  direction: incoming }
+        - { policy: allow, direction: outgoing }
+
+    # ------------------------------------------------------------------
+    # Phase 6 - journal persistence
+    # ------------------------------------------------------------------
+    - name: Phase 6 | persist the systemd journal
+      ansible.builtin.template:
+        src: journald.conf.j2
+        dest: /etc/systemd/journald.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart journald
+
+    # ------------------------------------------------------------------
+    # Phase 7 - logrotate
+    # ------------------------------------------------------------------
+    - name: Phase 7 | deploy the logrotate configuration
+      ansible.builtin.template:
+        src: kijaniosk.logrotate.j2
+        dest: /etc/logrotate.d/kijaniosk
+        owner: root
+        group: root
+        mode: "0644"
+
+    # ------------------------------------------------------------------
+    # Enable and start the service (after handlers have reloaded systemd)
+    # ------------------------------------------------------------------
+    - name: Flush handlers before enabling services
+      ansible.builtin.meta: flush_handlers
+
+    - name: Enable and start the service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        enabled: true
+        state: started
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: restart kijaniosk service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        state: restarted
+
+    - name: restart journald
+      ansible.builtin.systemd:
+        name: systemd-journald
+        state: restarted
