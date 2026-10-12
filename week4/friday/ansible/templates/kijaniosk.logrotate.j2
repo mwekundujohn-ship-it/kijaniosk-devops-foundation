@@ -1,0 +1,14 @@
+{{ logs_dir }}/*.log {
+    daily
+    rotate {{ log_retention_days }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+    su root {{ kijaniosk_group }}
+    create 0660 root {{ kijaniosk_group }}
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl try-restart {{ service_name }}.service >/dev/null 2>&1 || true
+    endscript
+}

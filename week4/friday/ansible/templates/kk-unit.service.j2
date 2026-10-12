@@ -1,0 +1,50 @@
+[Unit]
+Description=KijaniKiosk {{ app_role }} service ({{ service_name }})
+After=network-online.target
+Wants=network-online.target
+{% if depends_on_api %}
+After=kk-api.service
+Wants=kk-api.service
+{% endif %}
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ kijaniosk_group }}
+EnvironmentFile={{ config_dir }}/{{ app_role }}-api.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart={{ app_exec }}
+Restart=on-failure
+RestartSec=2
+ReadWritePaths={{ logs_dir }}
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @obsolete @mount @debug @cpu-emulation @swap @clock
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0027
+IPAddressDeny=any
+IPAddressAllow=localhost
+IPAddressAllow={{ internal_cidr }}
+
+[Install]
+WantedBy=multi-user.target

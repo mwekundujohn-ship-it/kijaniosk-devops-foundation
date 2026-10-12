@@ -1,0 +1,5 @@
+aws_region    = "us-east-1"
+instance_type = "t3.micro"
+key_name      = "kijaniosk"
+admin_cidr    = "196.96.20.20/32"
+ssh_key_path  = "~/.ssh/kijaniosk_ed25519"
