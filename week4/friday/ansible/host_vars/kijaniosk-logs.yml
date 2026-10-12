@@ -1,0 +1,7 @@
+server_name: kijaniosk-logs
+service_name: kk-logs
+app_role: logs
+app_port: 3002
+app_user: kk-logs
+depends_on_api: false
+app_exec: "/usr/bin/socat TCP-LISTEN:3002,fork,reuseaddr /dev/null"

@@ -1,0 +1,27 @@
+[Journal]
+# Persistent storage - survives reboot (Week 3 phase 6).
+Storage=persistent
+Compress=yes
+Seal=yes
+SplitMode=uid
+SyncIntervalSec=5m
+RateLimitIntervalSec=30s
+RateLimitBurst=10000
+SystemMaxUse=
+SystemKeepFree=
+SystemMaxFileSize=
+RuntimeMaxUse=
+RuntimeKeepFree=
+RuntimeMaxFileSize=
+MaxRetentionSec=
+MaxFileSec=1month
+ForwardToSyslog=no
+ForwardToKMsg=no
+ForwardToConsole=no
+ForwardToWall=yes
+MaxLevelStore=debug
+MaxLevelSyslog=debug
+MaxLevelKMsg=notice
+MaxLevelConsole=info
+MaxLevelWall=emerg
+LineMax=48K
