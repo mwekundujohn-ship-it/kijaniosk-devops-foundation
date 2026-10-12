@@ -1,0 +1,7 @@
+server_name: kijaniosk-api
+service_name: kk-api
+app_role: api
+app_port: 3000
+app_user: kk-api
+depends_on_api: false
+app_exec: "/usr/bin/socat TCP-LISTEN:3000,fork,reuseaddr /dev/null"
