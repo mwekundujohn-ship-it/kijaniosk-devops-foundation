@@ -1,4 +1,4 @@
-# KijaniKiosk DevOps Foundation — Week 2 Independent Project
+# KijaniKiosk DevOps Foundation: Week 2 Independent Project
 
 **Author:** Dalton Wambui
 
@@ -10,5 +10,5 @@ before the platform grows.
 
 ## Structure
 
-- `starter-kit/` — the foundational documents and network diagram.
-- `notes/` — personal revision notes on the Week 2 concepts.
+- `starter-kit/`: the foundational documents and network diagram.
+- `notes/`: personal revision notes on the Week 2 concepts.

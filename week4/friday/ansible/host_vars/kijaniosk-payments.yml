@@ -1,0 +1,7 @@
+server_name: kijaniosk-payments
+service_name: kk-payments
+app_role: payments
+app_port: 3001
+app_user: kk-payments
+depends_on_api: true
+app_exec: "/usr/bin/socat TCP-LISTEN:3001,fork,reuseaddr /dev/null"

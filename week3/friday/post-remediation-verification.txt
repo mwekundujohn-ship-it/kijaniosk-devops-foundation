@@ -1,0 +1,171 @@
+# Post-remediation verification: 2026-10-11T14:46:47+03:00
+
+## 0. put content in the logs so 'notifempty' does not skip rotation
+total 36
+drwxrws---+ 2 root kijaniosk 4096 Oct 11 14:45 .
+drwxr-xr-x  3 root root      4096 Oct 11 14:37 ..
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 api.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:45 api.log.1
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 logs.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:45 logs.log.1
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 payments.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:45 payments.log.1
+
+## 1. logrotate --debug (must pass with no errors)
+warning: logrotate in debug mode does nothing except printing debug messages!  Consider using verbose mode (-v) instead if this is not what you want.
+
+reading config file /etc/logrotate.d/kijaniosk
+Reading state from file: /var/lib/logrotate/status
+Allocating hash table for state file, size 64 entries
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+Creating new state
+
+Handling 1 logs
+
+rotating pattern: /opt/kijaniosk/shared/logs/*.log after 1 days empty log files are not rotated, (7 rotations), old logs are removed
+switching euid from 0 to 0 and egid from 0 to 981 (pid 61007)
+considering log /opt/kijaniosk/shared/logs/api.log
+  Now: 2026-10-11 14:46
+  Last rotated at 2026-10-11 14:45
+  log does not need rotating (log has already been rotated)
+considering log /opt/kijaniosk/shared/logs/logs.log
+  Now: 2026-10-11 14:46
+  Last rotated at 2026-10-11 14:45
+  log does not need rotating (log has already been rotated)
+considering log /opt/kijaniosk/shared/logs/payments.log
+  Now: 2026-10-11 14:46
+  Last rotated at 2026-10-11 14:45
+  log does not need rotating (log has already been rotated)
+not running postrotate script, since no logs were rotated
+switching euid from 0 to 0 and egid from 981 to 0 (pid 61007)
+
+## 2. force an actual rotation
+
+## 3. permissions on the newly created files after rotation
+total 36
+drwxrws---+ 2 root kijaniosk 4096 Oct 11 14:46 .
+drwxr-xr-x  3 root root      4096 Oct 11 14:37 ..
+-rw-rw----+ 1 root kijaniosk    0 Oct 11 14:46 api.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 api.log.1
+-rw-rw----+ 1 root kijaniosk   99 Oct 11 14:45 api.log.2.gz
+-rw-rw----+ 1 root kijaniosk    0 Oct 11 14:46 logs.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 logs.log.1
+-rw-rw----+ 1 root kijaniosk   99 Oct 11 14:45 logs.log.2.gz
+-rw-rw----+ 1 root kijaniosk    0 Oct 11 14:46 payments.log
+-rw-rw----+ 1 root kijaniosk  101 Oct 11 14:46 payments.log.1
+-rw-rw----+ 1 root kijaniosk   99 Oct 11 14:45 payments.log.2.gz
+
+## 4. ACLs on the directory (default ACLs must be present)
+# file: opt/kijaniosk/shared/logs/
+# owner: root
+# group: kijaniosk
+# flags: -s-
+user::rwx
+user:kk-logs:rwx
+user:kk-api:rwx
+user:kk-payments:r-x
+group::rwx
+mask::rwx
+other::---
+default:user::rwx
+default:user:kk-logs:rw-
+default:user:kk-api:rw-
+default:user:kk-payments:r--
+default:group::rwx	#effective:rw-
+default:mask::rw-
+default:other::---
+
+
+## 5. DEFINITIVE test: kk-api can write after rotation
+PASS: kk-api can write to the rotated api.log
+PASS: kk-api can create files in shared/logs after rotation
+
+## 5b. ACLs on the newly created api.log (named entries must survive)
+# file: /opt/kijaniosk/shared/logs/api.log
+# owner: root
+# group: kijaniosk
+user::rw-
+user:kk-logs:rw-
+user:kk-api:rw-
+user:kk-payments:r--
+group::rwx	#effective:rw-
+mask::rw-
+other::---
+
+
+## 6. getfacl for the four key directories
+--- /opt/kijaniosk ---
+# file: /opt/kijaniosk
+# owner: root
+# group: kijaniosk
+user::rwx
+group::r-x
+other::---
+
+--- /opt/kijaniosk/config ---
+# file: /opt/kijaniosk/config
+# owner: root
+# group: kijaniosk
+user::rwx
+group::r-x
+other::---
+
+--- /opt/kijaniosk/shared/logs ---
+# file: /opt/kijaniosk/shared/logs
+# owner: root
+# group: kijaniosk
+# flags: -s-
+user::rwx
+user:kk-logs:rwx
+user:kk-api:rwx
+user:kk-payments:r-x
+group::rwx
+mask::rwx
+other::---
+default:user::rwx
+default:user:kk-logs:rw-
+default:user:kk-api:rw-
+default:user:kk-payments:r--
+default:group::rwx	#effective:rw-
+default:mask::rw-
+default:other::---
+
+--- /opt/kijaniosk/health ---
+# file: /opt/kijaniosk/health
+# owner: root
+# group: kijaniosk
+user::rwx
+group::r-x
+other::---
+

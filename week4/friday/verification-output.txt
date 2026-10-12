@@ -1,0 +1,67 @@
+# Post-pipeline verification - 2026-10-12T10:29:53+03:00
+
+## Controller tool versions
+Terraform: Terraform v1.16.5
+Ansible:   ansible-playbook [core 2.21.5]
+AWS CLI:   aws-cli/2.37.11 Python/3.14.6 Linux/7.1.5+kali-amd64 exe/x86_64.kali.2026
+OS:        "Kali GNU/Linux Rolling"
+Python:    Python 3.14.6
+
+## Target servers
+### api (98.93.64.42)
+Warning: Permanently added '98.93.64.42' (ED25519) to the list of known hosts.
+active: active
+→ Overall exposure level for kk-api.service: 1.2 OK 🙂
+Challenge-D (service can read its env file):
+KISI_NAME=kijaniosk-api
+KISI_ROLE=api
+APP_PORT=3000
+LOG_DIR=/opt/kijaniosk/shared/logs
+shared/logs ACLs:
+# flags: -s-
+user:kk-logs:rwx
+user:kk-payments:r-x
+user:kk-api:rwx
+default:user:kk-logs:rw-
+default:user:kk-payments:r--
+default:user:kk-api:rw-
+journal storage: Storage=persistent
+
+### payments (32.197.15.244)
+Warning: Permanently added '32.197.15.244' (ED25519) to the list of known hosts.
+active: active
+→ Overall exposure level for kk-payments.service: 1.2 OK 🙂
+Challenge-D (service can read its env file):
+KISI_NAME=kijaniosk-payments
+KISI_ROLE=payments
+APP_PORT=3001
+LOG_DIR=/opt/kijaniosk/shared/logs
+shared/logs ACLs:
+# flags: -s-
+user:kk-logs:rwx
+user:kk-payments:r-x
+user:kk-api:rwx
+default:user:kk-logs:rw-
+default:user:kk-payments:r--
+default:user:kk-api:rw-
+journal storage: Storage=persistent
+
+### logs (34.204.174.194)
+Warning: Permanently added '34.204.174.194' (ED25519) to the list of known hosts.
+active: active
+→ Overall exposure level for kk-logs.service: 1.2 OK 🙂
+Challenge-D (service can read its env file):
+KISI_NAME=kijaniosk-logs
+KISI_ROLE=logs
+APP_PORT=3002
+LOG_DIR=/opt/kijaniosk/shared/logs
+shared/logs ACLs:
+# flags: -s-
+user:kk-logs:rwx
+user:kk-payments:r-x
+user:kk-api:rwx
+default:user:kk-logs:rw-
+default:user:kk-payments:r--
+default:user:kk-api:rw-
+journal storage: Storage=persistent
+

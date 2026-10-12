@@ -1,0 +1,44 @@
+# Variables shared by every KijaniKiosk server.
+# Connection settings - the SSH key here must match Terraform's key_name
+# (imported as "kijaniosk").
+ansible_user: ubuntu
+ssh_key_path: "~/.ssh/kijaniosk_ed25519"
+ansible_ssh_private_key_file: "~/.ssh/kijaniosk_ed25519"
+ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ansible_python_interpreter: /usr/bin/python3
+
+# Identities
+kijaniosk_group: kijaniosk
+service_accounts:
+  - kk-api
+  - kk-payments
+  - kk-logs
+
+# Filesystem layout (mirrors the Week 3 provisioning script)
+app_root: /opt/kijaniosk
+config_dir: /opt/kijaniosk/config
+logs_dir: /opt/kijaniosk/shared/logs
+releases_dir: /opt/kijaniosk/releases
+health_dir: /opt/kijaniosk/health
+
+# Packages needed for the services, firewall and ACLs
+base_packages:
+  - socat
+  - ufw
+  - acl
+  - curl
+  - ca-certificates
+
+# Logging
+log_retention_days: 7
+
+# Firewall sources
+admin_cidr: 196.96.20.20/32   # operator public IP (SSH)
+internal_cidr: 172.31.0.0/16  # default VPC CIDR (application ports)
+
+# ACL model for the shared logs directory.
+# kk-api and kk-logs write; kk-payments is read-only (audit correlation).
+logs_acl_users:
+  - { user: kk-api,      perms: "rwx", default_perms: "rw" }
+  - { user: kk-logs,     perms: "rwx", default_perms: "rw" }
+  - { user: kk-payments, perms: "r-x", default_perms: "r" }

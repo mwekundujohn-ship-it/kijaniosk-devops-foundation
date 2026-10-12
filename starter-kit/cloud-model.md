@@ -8,7 +8,7 @@
 
 ## Recommendation for KijaniKiosk
 
-KijaniKiosk should mainly use PaaS, with selective IaaS where real low-level control or cost tuning is needed, and SaaS for commodities it should never build itself. As a small team, the priority is shipping product fast, and PaaS removes the undifferentiated heavy lifting of patching servers, scaling, and OS maintenance. IaaS is reserved for the few components that genuinely need control, while SaaS covers things like email and monitoring that are cheaper to consume than to run.
+KijaniKiosk should mainly use PaaS. We only drop to IaaS for the few parts that need real low-level control or careful cost tuning, and we use SaaS for anything that is a commodity. Our team is small, so the priority is shipping product, not patching servers. PaaS handles the scaling and the OS updates for us, which speeds delivery and cuts operational risk. SaaS covers things like email and monitoring, which are cheaper to consume than to run ourselves.
 
 ## Reasons
 
