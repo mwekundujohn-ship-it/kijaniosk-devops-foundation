@@ -1,0 +1,80 @@
+==================================================================
+ KijaniKiosk Week 8 - Requirement 3 - Deployment to the cluster
+ Captured (UTC): 2026-11-04T06:25Z (initial rollout)
+ Namespace: default
+==================================================================
+
+--- NAMESPACE CLEARED BEFORE START ---
+$ kubectl get all -l app=kk-payments
+No resources found in default namespace.
+
+$ kubectl get secret kijani-registry-credentials
+Error from server (NotFound): secrets "kijani-registry-credentials" not found
+
+--- PULL SECRET REFERENCED BY imagePullSecrets ---
+$ kubectl create secret docker-registry kijani-registry-credentials \
+    --docker-server=host.minikube.internal:5000 \
+    --docker-username=<redacted> --docker-password=<redacted> \
+    --docker-email=<redacted> --dry-run=client -o yaml | kubectl apply -f -
+secret/kijani-registry-credentials created
+
+$ kubectl get secret kijani-registry-credentials
+NAME                          TYPE                             DATA   AGE
+kijani-registry-credentials   kubernetes.io/dockerconfigjson   1      0s
+(Credential values redacted. The pull secret is a cluster object and is never committed.)
+
+--- APPLY THE DEPLOYMENT ---
+$ kubectl apply -f kk-payments-deployment.yaml
+deployment.apps/kk-payments created
+
+--- ROLLOUT ---
+$ kubectl rollout status deployment/kk-payments --timeout=180s
+Waiting for deployment "kk-payments" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "kk-payments" rollout to finish: 1 of 2 updated replicas are available...
+deployment "kk-payments" successfully rolled out
+
+--- PODS: 2/2 RUNNING ---
+$ kubectl get pods -l app=kk-payments -o wide
+NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+kk-payments-56f76dc5f8-6wljb   1/1     Running   0          4s    10.244.0.3   minikube   <none>           <none>
+kk-payments-56f76dc5f8-wrd2j   1/1     Running   0          3s    10.244.0.4   minikube   <none>           <none>
+
+--- DEPLOYMENT: 2/2 AVAILABLE ---
+$ kubectl get deployment kk-payments
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           4s
+
+--- REPLICASET ---
+$ kubectl get rs -l app=kk-payments
+NAME                     DESIRED   CURRENT   READY   AGE
+kk-payments-56f76dc5f8   2         2         2       4s
+
+--- IMAGE AND PULL SECRET WIRING ---
+$ kubectl get pods -l app=kk-payments \
+    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\t"}{.spec.imagePullSecrets[0].name}{"\n"}{end}'
+kk-payments-56f76dc5f8-6wljb	host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4	kijani-registry-credentials
+kk-payments-56f76dc5f8-wrd2j	host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4	kijani-registry-credentials
+
+--- CONTAINER LOGS (version baked into the image) ---
+$ kubectl logs -l app=kk-payments --tail=10 --prefix
+[pod/kk-payments-56f76dc5f8-6wljb/kk-payments] kk-payments 2.4.0-d8c32f4 listening on port 3001
+[pod/kk-payments-56f76dc5f8-wrd2j/kk-payments] kk-payments 2.4.0-d8c32f4 listening on port 3001
+
+--- MANIFEST REQUIREMENTS ---
+$ grep -nE 'replicas:|image:|imagePullSecrets:|name: kijani-registry-credentials|requests:|limits:|cpu:|memory:' kk-payments-deployment.yaml
+8:  replicas: 2
+17:      imagePullSecrets:
+18:        - name: kijani-registry-credentials
+21:          image: host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4
+32:            requests:
+33:              cpu: "100m"
+34:              memory: "64Mi"
+35:            limits:
+36:              cpu: "500m"
+37:              memory: "128Mi"
+
+--- RESULT ---
+PASS: deployment requested 2 replicas, the rollout reached 2/2 available, both
+pods pulled the versioned image from the private registry through the
+kijani-registry-credentials pull secret, and the app logs the deployed tag.
+==================================================================
