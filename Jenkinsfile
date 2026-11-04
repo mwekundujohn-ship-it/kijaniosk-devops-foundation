@@ -65,22 +65,27 @@ pipeline {
         }
         stage('Publish') {
             steps {
+                script {
+                    def pkg = new groovy.json.JsonSlurper().parseText(readFile("${APP_DIR}/package.json"))
+                    def sha = (env.GIT_COMMIT ?: '').take(7)
+                    env.PUBLISH_VERSION = "${pkg.version}-${sha}"
+                    env.ARTIFACT_URL = "${env.NEXUS_URL}/repository/${env.NEXUS_REPO}/${env.APP_NAME}/-/${env.APP_NAME}-${env.PUBLISH_VERSION}.tgz"
+                }
                 dir("${APP_DIR}") {
                     withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                         sh '''
                             set -eu
-                            echo "Nexus credential resolved for ${NEXUS_USER}: [${NEXUS_PASS}]"
-                            SHA=$(git rev-parse --short HEAD)
-                            BASE_VERSION=$(node -p "require('./package.json').version")
-                            VERSION="${BASE_VERSION}-${SHA}"
-                            npm version "$VERSION" --no-git-tag-version --allow-same-version
+                            cleanup() { rm -f .npmrc; }
+                            trap cleanup EXIT
+                            npm version "$PUBLISH_VERSION" --no-git-tag-version --allow-same-version
                             AUTH=$(printf '%s:%s' "$NEXUS_USER" "$NEXUS_PASS" | base64 -w0)
-                            echo "registry=${NEXUS_URL}/repository/${NEXUS_REPO}/" > .npmrc
-                            echo "//127.0.0.1:8081/repository/${NEXUS_REPO}/:_auth=${AUTH}" >> .npmrc
-                            echo "always-auth=true" >> .npmrc
+                            NEXUS_HOST=${NEXUS_URL#*://}
+                            {
+                              echo "registry=${NEXUS_URL}/repository/${NEXUS_REPO}/"
+                              echo "//${NEXUS_HOST}/repository/${NEXUS_REPO}/:_auth=${AUTH}"
+                              echo "always-auth=true"
+                            } > .npmrc
                             npm publish --registry "${NEXUS_URL}/repository/${NEXUS_REPO}/"
-                            rm -f .npmrc
-                            echo "ARTIFACT_URL=${NEXUS_URL}/repository/${NEXUS_REPO}/${APP_NAME}/-/${APP_NAME}-${VERSION}.tgz"
                         '''
                     }
                 }
@@ -93,13 +98,13 @@ pipeline {
             cleanWs()
         }
         success {
-            echo "Pipeline succeeded. A version was published to the Nexus registry."
+            echo "SUCCESS: published ${env.APP_NAME} ${env.PUBLISH_VERSION} to Nexus -> ${env.ARTIFACT_URL}"
         }
         failure {
-            echo "Pipeline failed during its current stage. Later stages did not run."
+            echo "FAILURE: build ${env.BUILD_NUMBER} stopped at the first failing stage. Later stages were skipped and no new version was published from this run."
         }
         changed {
-            echo "Pipeline result changed to ${currentBuild.currentResult}."
+            echo "Pipeline status changed to ${currentBuild.currentResult} on build ${env.BUILD_NUMBER}."
         }
     }
 }
