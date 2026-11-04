@@ -1,0 +1,89 @@
+==================================================================
+ KijaniKiosk Week 8 - Requirement 2 - Private registry round-trip
+ Host repository : localhost:5000/kk-payments
+ Cluster address : host.minikube.internal:5000/kk-payments
+ Captured (UTC)  : 2026-11-04T06:25Z (push) / 2026-11-04T06:28Z (clean pull)
+==================================================================
+
+--- TAG ---
+VERSION = 2.4.0
+GITSHA  = d8c32f4
+TAG     = 2.4.0-d8c32f4
+
+--- 1. PUSH THE TAGGED IMAGE ---
+$ docker push localhost:5000/kk-payments:2.4.0-d8c32f4
+The push refers to repository [localhost:5000/kk-payments]
+297ab65b0b3e: Preparing
+a11870c418ef: Preparing
+853d97ee3b47: Preparing
+c146cf1ac320: Preparing
+be64570a34e4: Preparing
+853d97ee3b47: Pushed
+a11870c418ef: Pushed
+297ab65b0b3e: Pushed
+be64570a34e4: Pushed
+c146cf1ac320: Pushed
+2.4.0-d8c32f4: digest: sha256:eaf8a47e9e66098d5e20473a30ea8cfc0ea74a636d4f9f54bef854909912bdd3 size: 1361
+
+--- 2. DELETE THE LOCAL COPY ---
+$ docker rmi kk-payments:2.4.0-d8c32f4 localhost:5000/kk-payments:2.4.0-d8c32f4
+Untagged: kk-payments:2.4.0-d8c32f4
+Untagged: localhost:5000/kk-payments:2.4.0-d8c32f4
+Untagged: localhost:5000/kk-payments@sha256:eaf8a47e9e66098d5e20473a30ea8cfc0ea74a636d4f9f54bef854909912bdd3
+Deleted: sha256:5a1df7fc7dad65c131422b8eacb38a6762507e022c0b5979a699c138a140264b
+
+$ docker builder prune -af
+Total:  405.2MB
+
+$ docker image prune -f
+Total reclaimed space: 126MB
+
+$ docker image inspect localhost:5000/kk-payments:2.4.0-d8c32f4
+Error: No such image: localhost:5000/kk-payments:2.4.0-d8c32f4
+(confirmed: no local copy remains)
+
+--- 3. WHAT THE REGISTRY HOLDS ---
+$ curl -sS http://127.0.0.1:5000/v2/_catalog
+{"repositories":["kk-payments"]}
+
+$ curl -sS http://127.0.0.1:5000/v2/kk-payments/tags/list
+{"name":"kk-payments","tags":["2.4.0-d8c32f4"]}
+
+
+--- 4. FRESH PULL (layers downloaded again, not reused) ---
+$ docker pull localhost:5000/kk-payments:2.4.0-d8c32f4
+2.4.0-d8c32f4: Pulling from kk-payments
+96d196275c2e: Pulling fs layer
+da813fcaeae9: Pulling fs layer
+57b0e1237f44: Pulling fs layer
+0646fd58a5d8: Pulling fs layer
+e1856e70ec10: Pulling fs layer
+0646fd58a5d8: Waiting
+e1856e70ec10: Waiting
+57b0e1237f44: Verifying Checksum
+57b0e1237f44: Download complete
+0646fd58a5d8: Verifying Checksum
+0646fd58a5d8: Download complete
+e1856e70ec10: Download complete
+96d196275c2e: Download complete
+da813fcaeae9: Verifying Checksum
+da813fcaeae9: Download complete
+96d196275c2e: Pull complete
+da813fcaeae9: Pull complete
+57b0e1237f44: Pull complete
+0646fd58a5d8: Pull complete
+e1856e70ec10: Pull complete
+Digest: sha256:eaf8a47e9e66098d5e20473a30ea8cfc0ea74a636d4f9f54bef854909912bdd3
+Status: Downloaded newer image for localhost:5000/kk-payments:2.4.0-d8c32f4
+localhost:5000/kk-payments:2.4.0-d8c32f4
+
+--- 5. DIGEST AFTER PULL ---
+$ docker image inspect localhost:5000/kk-payments:2.4.0-d8c32f4 --format '{{index .RepoDigests 0}}'
+localhost:5000/kk-payments@sha256:eaf8a47e9e66098d5e20473a30ea8cfc0ea74a636d4f9f54bef854909912bdd3
+
+--- RESULT ---
+PASS: push digest and pull digest are identical (sha256:eaf8a47e...).
+The local image and its build cache were removed, every layer was downloaded
+again from the registry, and the restored image is byte-for-byte the same
+artifact. The manifest in kk-payments-deployment.yaml references this exact tag.
+==================================================================

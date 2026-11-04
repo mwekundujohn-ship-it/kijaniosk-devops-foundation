@@ -18,7 +18,7 @@ spec:
         - name: kijani-registry-credentials
       containers:
         - name: kk-payments
-          image: host.minikube.internal:5000/kk-payments:2.4.0-PLACEHOLDER
+          image: host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4
           imagePullPolicy: Always
           ports:
             - name: http
