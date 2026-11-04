@@ -66,9 +66,9 @@ pipeline {
         stage('Publish') {
             steps {
                 script {
-                    def pkg = new groovy.json.JsonSlurper().parseText(readFile("${APP_DIR}/package.json"))
+                    def base = sh(script: "node -p 'require(\"./${APP_DIR}/package.json\").version'", returnStdout: true).trim()
                     def sha = (env.GIT_COMMIT ?: '').take(7)
-                    env.PUBLISH_VERSION = "${pkg.version}-${sha}"
+                    env.PUBLISH_VERSION = "${base}-${sha}"
                     env.ARTIFACT_URL = "${env.NEXUS_URL}/repository/${env.NEXUS_REPO}/${env.APP_NAME}/-/${env.APP_NAME}-${env.PUBLISH_VERSION}.tgz"
                 }
                 dir("${APP_DIR}") {
