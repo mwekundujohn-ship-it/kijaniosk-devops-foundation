@@ -26,7 +26,7 @@ The final step publishes the package to our internal registry, Nexus. Each publi
 
 ## What Happens When Something Goes Wrong
 
-When a check fails, the process stops at that check and the later steps do not run. Nothing reaches the registry. The team receives a message naming the step that stopped and a link to the full output of that run. The last good version remains available, so anyone who needs a working package can still get one.
+When a check fails, the process stops at that check and the later steps do not run. Nothing reaches the registry. The run is recorded as failed and its full output is kept, so anyone can open that run and see exactly which check stopped it and why. The last good version remains available, so anyone who needs a working package can still get one.
 
 This behaviour is deliberate. A failed shape check means the code was never valid, so building it would only waste time. A failed test means the behaviour is wrong, so publishing it would place a faulty package within reach of anyone who installs it. A failed vulnerability scan means we would be shipping a known weakness. In every case, stopping early costs less than discovering the problem after release.
 

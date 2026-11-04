@@ -11,3 +11,7 @@ Each fault was injected on the `feature/week5-ci-pipeline` branch, one at a time
 | 5 | Publish | Pointed the registry URL at `127.0.0.1:9999` instead of the Nexus port (fault commit `7483fed`). | Lint, Build, Test, Security Audit and Archive passed. Publish failed with `ECONNREFUSED` while contacting the registry, so no package was uploaded. Reverted to `15807c2`; the next run was green. | A failed upload must not be reported as a release; the earlier checks remain valid and the last good version stays available. |
 
 All five faults were reverted with `git reset --hard 15807c2`, and a fresh build confirmed green before the next fault was injected.
+
+## Pipeline version note
+
+The faults above were injected against the pipeline as committed at `15807c2`. The only Jenkinsfile changes made afterwards affected the Publish stage's credential handling (removing a masked credential echo and adding an `EXIT` trap so `.npmrc` is always deleted) and the wording of the `post` messages. Neither change alters the stage order, the parallel Verify branches, or which stages are skipped when a stage fails, so the observed behaviour in the table still describes the committed pipeline. The final committed Jenkinsfile is `ee20e05`; the final green run against it is build #19 (`green-pipeline-run.txt`), and the credential audit was re-run against `ee20e05` (`credential-audit.txt`).
