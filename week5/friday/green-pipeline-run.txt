@@ -2,7 +2,7 @@
 # Jenkins job: kijanikiosk-week5  |  Build: #19  |  Branch: feature/week5-ci-pipeline
 # Commit built: ee20e05 (pipeline code; later commits on this branch add evidence/documentation only)
 # Started: 2026-11-04 05:43:04 UTC  |  Result: SUCCESS
-# Total runtime: 14.4 seconds (0 min 14 s) — well under the 10 minute limit
+# Total runtime: 14.4 seconds (0 min 14 s), well under the 10 minute limit
 # Docker agent: node:18.20.4 (pinned)  |  Parallel Verify: Test + Security Audit
 # Credentials: NEXUS_PASS masked by Jenkins; .npmrc written and removed in the same sh step
 # ----------------------------------------------------------------------
