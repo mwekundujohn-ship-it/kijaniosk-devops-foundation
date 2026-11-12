@@ -8,7 +8,6 @@ configMapGenerator:
     literals:
       - NODE_ENV=production
       - PORT=3001
-      - APP_VERSION=2.4.0-d8c32f4
       - RECEIPTS_BUCKET=kk-payments-receipts-production-545572979505
       - LOG_LEVEL=info
     options:

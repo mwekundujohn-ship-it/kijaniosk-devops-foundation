@@ -165,6 +165,9 @@ Do not answer with a definition alone. The interviewer will follow up with
    process can change.
 5. "Why a ConfigMap instead of baking environment values into the image?" The
    same image is promoted; environment differences belong in configuration.
+   `APP_VERSION` is the exception: it identifies the immutable artifact, so it
+   is baked in at build time. `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and
+   `LOG_LEVEL` are runtime configuration.
 6. "Why does the ConfigMap name have a hash?" Kustomize appends a content hash
    and rewrites the Deployment reference, so a config change triggers a rollout.
 7. "Why `imagePullPolicy: Always`?" The lab reuses tags during development; the
@@ -173,6 +176,10 @@ Do not answer with a definition alone. The interviewer will follow up with
    Service and does not expose the workload on every node.
 9. "What is the rollback command?" `kubectl rollout undo
    deployment/kk-payments -n kijani-production`.
+9a. "Why does the smoke test poll for the expected version?" A rollout can
+    finish while an old pod is still terminating and still receiving Service
+    traffic. Polling until the expected version appears removes that race; it
+    caught a real failure in build #1.
 10. "What is not production-grade here?" Single minikube cluster, local
     registry, lab credentials, no ingress/TLS, no external secret manager, no
     real Prometheus stack, and no Week 10 receipt implementation. State these

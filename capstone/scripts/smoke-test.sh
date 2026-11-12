@@ -35,7 +35,24 @@ if [[ "$READY" -ne 1 ]]; then
   exit 1
 fi
 
-HEALTH="$(curl -fsS "http://127.0.0.1:${LOCAL_PORT}/health")"
+HEALTH=""
+for _ in $(seq 1 30); do
+  if HEALTH="$(curl -fsS "http://127.0.0.1:${LOCAL_PORT}/health" 2>/dev/null)"; then
+    if [[ -z "$EXPECTED_VERSION" ]]; then
+      break
+    fi
+    if python3 -c 'import json,sys; sys.exit(0 if json.loads(sys.argv[1]).get("version") == sys.argv[2] else 1)' "$HEALTH" "$EXPECTED_VERSION" 2>/dev/null; then
+      break
+    fi
+  fi
+  sleep 1
+done
+
+if [[ -z "$HEALTH" ]]; then
+  echo "FAIL: /health did not return a response" >&2
+  exit 1
+fi
+
 python3 - "$HEALTH" "$EXPECTED_VERSION" <<'PY'
 import json
 import sys

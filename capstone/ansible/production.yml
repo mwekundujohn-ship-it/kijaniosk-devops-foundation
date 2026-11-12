@@ -21,6 +21,12 @@
       register: apply_result
       changed_when: "'created' in apply_result.stdout or 'configured' in apply_result.stdout"
 
+    - name: Set the production image tag
+      ansible.builtin.command:
+        cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} -n {{ production_namespace }} set image deployment/kk-payments kk-payments={{ image_registry }}/{{ image_repository }}:{{ image_tag }}"
+      register: image_result
+      changed_when: "'image updated' in image_result.stdout"
+
     - name: Wait for the production rollout
       ansible.builtin.command:
         cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} -n {{ production_namespace }} rollout status deployment/kk-payments --timeout=180s"

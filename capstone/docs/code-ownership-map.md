@@ -60,7 +60,7 @@ component, be ready to answer five questions in this order:
 | Container image | `capstone/k8s/base/deployment.yaml:26` | Base image and tag. | Gives a known-good default before the pipeline sets the release tag. | Kubelet. | The pod has no image. |
 | Pull policy | `capstone/k8s/base/deployment.yaml:27` | `Always`. | Ensures the cluster fetches the pushed tag instead of a stale cache. | Kubelet. | A reused tag can run an old image. |
 | Container port | `capstone/k8s/base/deployment.yaml:28-30` | Names port `http` and sets `containerPort: 3001`. | The probes and Service target the named port. | Probes and Service. | Named-port references do not resolve. |
-| ConfigMap reference | `capstone/k8s/base/deployment.yaml:31-33` | Injects `kk-payments-config` as environment variables. | Separates environment configuration from the image. | Application process. | The app lacks `PORT` and `APP_VERSION`; the smoke test's version assertion fails. |
+| ConfigMap reference | `capstone/k8s/base/deployment.yaml:31-33` | Injects `kk-payments-config` as environment variables. | Separates runtime environment configuration from the immutable image. | Application process. | The ConfigMap reference is unresolved, so the pod does not start with the expected `PORT` and environment settings. Version is baked into the image, not the ConfigMap. |
 | Readiness probe | `capstone/k8s/base/deployment.yaml:34-39` | Checks `/health` every five seconds. | Prevents traffic from reaching a pod that is not ready. | Service endpoints. | Traffic reaches a starting or broken pod. |
 | Liveness probe | `capstone/k8s/base/deployment.yaml:40-45` | Checks `/health` every ten seconds. | Restarts a hung process. | Kubelet. | A hung pod stays in the endpoint list. |
 | Resources | `capstone/k8s/base/deployment.yaml:46-52` | Requests and limits CPU and memory. | Makes scheduling predictable and bounds resource use. | Scheduler and kubelet. | The pod can consume unbounded memory or be unschedulable. |
@@ -68,12 +68,12 @@ component, be ready to answer five questions in this order:
 | Service identity | `capstone/k8s/base/service.yaml:1-10` | Names the Service and selects `app: kk-payments`. | Gives the Deployment a stable DNS name and virtual IP. | Smoke test and in-cluster clients. | Clients cannot find the pods. |
 | Service port | `capstone/k8s/base/service.yaml:11-14` | Port 3001 targets named port `http`. | Maps the Service port to the container port without duplicating the number. | Clients and port-forward. | The Service points at the wrong port. |
 | Staging namespace | `capstone/k8s/overlays/staging/kustomization.yaml:3` | Sets `kijani-staging`. | Prevents staging resources from landing in `default`. | All staging resources. | Staging and production collide. |
-| Staging config | `capstone/k8s/overlays/staging/kustomization.yaml:6-13` | Generates the staging ConfigMap. | Keeps environment values out of the base. | Deployment `envFrom`. | Staging uses base or production values. |
+| Staging config | `capstone/k8s/overlays/staging/kustomization.yaml:6-15` | Generates the staging ConfigMap with `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and `LOG_LEVEL`. | Keeps environment values out of the base and out of the image. | Deployment `envFrom`. | Staging uses base or production values. |
 | Staging image | `capstone/k8s/overlays/staging/kustomization.yaml:14-16` | Sets the default image tag. | Gives a deterministic first deployment; Jenkins overrides it. | Staging Deployment. | The overlay references an unintended tag. |
 | Staging replicas | `capstone/k8s/overlays/staging/kustomization.yaml:17-19` | Two replicas. | Staging is smaller than production but still highly available. | Staging Deployment. | Staging uses the base count by accident. |
 | Staging labels | `capstone/k8s/overlays/staging/kustomization.yaml:20-23` | Adds `environment: staging` and includes selectors. | Makes environment visible in selectors and dashboards. | Deployment and Service selectors. | Environment is only visible in the namespace name. |
 | Production namespace | `capstone/k8s/overlays/production/kustomization.yaml:3` | Sets `kijani-production`. | Separates the production release. | All production resources. | Production resources collide with staging. |
-| Production config | `capstone/k8s/overlays/production/kustomization.yaml:6-13` | Generates the production ConfigMap. | Production gets its own environment, bucket name, and log level. | Deployment `envFrom`. | Production runs with staging settings. |
+| Production config | `capstone/k8s/overlays/production/kustomization.yaml:6-15` | Generates the production ConfigMap with `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and `LOG_LEVEL`. | Production gets its own environment, bucket name, and log level. | Deployment `envFrom`. | Production runs with staging settings. |
 | Production replicas | `capstone/k8s/overlays/production/kustomization.yaml:17-19` | Three replicas. | More capacity and failure tolerance. | Production Deployment. | Production runs at staging capacity. |
 | Production labels | `capstone/k8s/overlays/production/kustomization.yaml:20-23` | Adds `environment: production`. | Makes the promotion target explicit in selectors. | Production resources. | Selectors do not distinguish environments. |
 
@@ -87,8 +87,9 @@ component, be ready to answer five questions in this order:
 | Kubeconfig check | `capstone/ansible/staging.yml:12-16` | Fails with a clear message if the kubeconfig is missing. | Prevents a confusing kubectl error later. | Before apply. | The failure is harder to diagnose. |
 | Apply task | `capstone/ansible/staging.yml:18-22` | Runs `kubectl apply -k` with the context. | Applies the rendered overlay declaratively. | Staging. | The namespace exists but the workload does not. |
 | Changed detection | `capstone/ansible/staging.yml:21-22` | Reports changed only for created or configured resources. | Makes Ansible output honest on repeat runs. | Apply result. | Every run reports changed, hiding real drift. |
-| Rollout wait | `capstone/ansible/staging.yml:24-27` | Waits for the Deployment to become available. | Prevents a green playbook on a failed rollout. | After apply. | The playbook succeeds before pods are ready. |
-| ConfigMap readback | `capstone/ansible/staging.yml:29-37` | Lists applied ConfigMaps and prints them. | Proves the hash-suffixed ConfigMap was created. | After rollout. | The demo cannot show which ConfigMap was applied. |
+| Image tag task | `capstone/ansible/staging.yml:24-28` | Sets the Deployment image to `{{ image_registry }}/{{ image_repository }}:{{ image_tag }}`. | `kubectl apply -k` resets the image to the overlay default; this task makes the playbook deploy the requested tag. | Staging; production has the same task. | Ansible re-runs an older image than the tag passed with `-e image_tag=...`. |
+| Rollout wait | `capstone/ansible/staging.yml:30-33` | Waits for the Deployment to become available. | Prevents a green playbook on a failed rollout. | After apply and image update. | The playbook succeeds before pods are ready. |
+| ConfigMap readback | `capstone/ansible/staging.yml:35-43` | Lists applied ConfigMaps and prints them. | Proves the hash-suffixed ConfigMap was created. | After rollout. | The demo cannot show which ConfigMap was applied. |
 
 ## Scripts
 
@@ -99,8 +100,8 @@ component, be ready to answer five questions in this order:
 | Port-forward | `capstone/scripts/smoke-test.sh:19-21` | Forwards a local port to the Service. | Tests the Service path without exposing a NodePort. | Health and total checks. | The test cannot reach the service. |
 | Readiness loop | `capstone/scripts/smoke-test.sh:23-30` | Retries health for 30 seconds. | Absorbs the time between rollout and endpoint readiness. | Before assertions. | A fast test can fail spuriously. |
 | Failure output | `capstone/scripts/smoke-test.sh:32-36` | Prints the port-forward log and exits non-zero. | Turns a timeout into an actionable error. | CI failure path. | The error is silent. |
-| Health assertion | `capstone/scripts/smoke-test.sh:38-50` | Parses `/health`, asserts status, service, and version. | Catches a wrong image or failed process. | Staging and production. | A wrong release can pass. |
-| Total assertion | `capstone/scripts/smoke-test.sh:52-62` | Posts two line items and asserts total 42. | Exercises the actual payment calculation, not only health. | Staging and production. | A broken calculation passes the smoke test. |
+| Health assertion | `capstone/scripts/smoke-test.sh:38-67` | Polls `/health` until the expected version appears, then asserts status, service, and version. | Catches a wrong image or failed process, and avoids the rollout race where an old pod still serves traffic. | Staging and production. | A wrong release can pass, or a correct release can fail during rollout. |
+| Total assertion | `capstone/scripts/smoke-test.sh:69-79` | Posts two line items and asserts total 42. | Exercises the actual payment calculation, not only health. | Staging and production. | A broken calculation passes the smoke test. |
 | Cleanup | `capstone/scripts/smoke-test.sh:11-17` | Kills port-forward and removes the log on exit. | Prevents orphan processes and leaked temp files. | Every exit path. | Repeated runs accumulate processes and files. |
 | App verification | `capstone/scripts/local-pipeline.sh:20-26` | Copies the app into a temp directory and runs Node 18 tests in Docker. | Reproduces CI without polluting the repository with root-owned `node_modules`. | Local pipeline. | Tests depend on the host Node version or modify the repo. |
 | Image build | `capstone/scripts/local-pipeline.sh:28-30` | Builds the Week 8 production image. | Creates the artifact to promote. | Local pipeline. | There is no image to deploy. |
@@ -197,8 +198,15 @@ readiness probe is wrong, the smoke test times out or fails.
 
 **What happens if the ConfigMap is removed?**
 The Deployment's `envFrom` reference is unresolved, so the pod does not start
-with the expected `PORT` and `APP_VERSION`. The version assertion fails, and the
-app may listen on the wrong port.
+with the expected `PORT` and environment settings. The app may listen on the
+wrong port, and the smoke test fails.
+
+**Why is `APP_VERSION` not in the ConfigMap?**
+`APP_VERSION` is part of the immutable image: the Dockerfile accepts it as a
+build argument and bakes it into the image. The ConfigMap is for runtime
+environment values. Putting the version in the ConfigMap would let a pod report
+a version that does not match the image it is running. The image tag and the
+`/health` version must agree.
 
 **What happens if the readiness probe is removed?**
 The Service can send traffic to a pod that has not finished starting. The
