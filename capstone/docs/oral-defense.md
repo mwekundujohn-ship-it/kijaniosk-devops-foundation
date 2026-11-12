@@ -110,7 +110,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 
 ## Drill 9 — Terraform state and namespaces
 
-- Files: `capstone/terraform/backend.tf` and `capstone/terraform/main.tf:12-28`.
+- Files: `capstone/terraform/backend.tf` and `capstone/terraform/main.tf:17-33`.
 - Behavior: remote S3 state with locking; two `kubernetes_namespace_v1`
   resources with common labels.
 - Purpose: durable state and Terraform-owned environment boundaries.

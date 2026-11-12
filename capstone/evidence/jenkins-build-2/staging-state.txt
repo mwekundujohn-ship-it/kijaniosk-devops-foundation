@@ -1,0 +1,16 @@
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/kk-payments-7d7649494c-kk7v5   1/1     Running   0          4m26s
+pod/kk-payments-7d7649494c-n4n8m   1/1     Running   0          4m12s
+
+NAME                          TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/kk-payments-service   ClusterIP   10.97.110.58   <none>        3001/TCP   30m
+
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kk-payments   2/2     2            2           30m
+
+NAME                                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/kk-payments-647b5d45c5   0         0         0       30m
+replicaset.apps/kk-payments-6df5769468   0         0         0       13m
+replicaset.apps/kk-payments-75dcb4d844   0         0         0       12m
+replicaset.apps/kk-payments-75ffc74999   0         0         0       17m
+replicaset.apps/kk-payments-7d7649494c   2         2         2       4m26s

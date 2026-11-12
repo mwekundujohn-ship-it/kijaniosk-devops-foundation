@@ -63,12 +63,12 @@ and runs `ansible-playbook --syntax-check` on both playbooks.
 - Jenkinsfile syntax through the Jenkins declarative linter when Jenkins is
   running.
 - The Week 5 test suite and Week 8 image build through the local pipeline.
+- A full Jenkins build: build #2 succeeded for `2.4.0-2a84c81`, including
+  staging smoke, the production approval gate, production smoke, and archived
+  evidence in `capstone/evidence/jenkins-build-2/`.
 
 ## What is not verified
 
-- A full Jenkins run with the approval gate. The pipeline is written for the
-  `capstone-ci:1.0` agent image, which must be built and pushed before the job
-  runs.
 - PrometheusRule evaluation. The rule requires kube-state-metrics and the
   Prometheus Operator; neither is installed in the current minikube cluster.
 - The Week 10 serverless receipt chain. No Week 10 specification or code exists

@@ -69,13 +69,13 @@ component, be ready to answer five questions in this order:
 | Service port | `capstone/k8s/base/service.yaml:11-14` | Port 3001 targets named port `http`. | Maps the Service port to the container port without duplicating the number. | Clients and port-forward. | The Service points at the wrong port. |
 | Staging namespace | `capstone/k8s/overlays/staging/kustomization.yaml:3` | Sets `kijani-staging`. | Prevents staging resources from landing in `default`. | All staging resources. | Staging and production collide. |
 | Staging config | `capstone/k8s/overlays/staging/kustomization.yaml:6-15` | Generates the staging ConfigMap with `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and `LOG_LEVEL`. | Keeps environment values out of the base and out of the image. | Deployment `envFrom`. | Staging uses base or production values. |
-| Staging image | `capstone/k8s/overlays/staging/kustomization.yaml:14-16` | Sets the default image tag. | Gives a deterministic first deployment; Jenkins overrides it. | Staging Deployment. | The overlay references an unintended tag. |
-| Staging replicas | `capstone/k8s/overlays/staging/kustomization.yaml:17-19` | Two replicas. | Staging is smaller than production but still highly available. | Staging Deployment. | Staging uses the base count by accident. |
-| Staging labels | `capstone/k8s/overlays/staging/kustomization.yaml:20-23` | Adds `environment: staging` and includes selectors. | Makes environment visible in selectors and dashboards. | Deployment and Service selectors. | Environment is only visible in the namespace name. |
+| Staging image | `capstone/k8s/overlays/staging/kustomization.yaml:16-18` | Sets the default image tag. | Gives a deterministic first deployment; Jenkins overrides it. | Staging Deployment. | The overlay references an unintended tag. |
+| Staging replicas | `capstone/k8s/overlays/staging/kustomization.yaml:19-21` | Two replicas. | Staging is smaller than production but still highly available. | Staging Deployment. | Staging uses the base count by accident. |
+| Staging labels | `capstone/k8s/overlays/staging/kustomization.yaml:22-25` | Adds `environment: staging` and includes selectors. | Makes environment visible in selectors and dashboards. | Deployment and Service selectors. | Environment is only visible in the namespace name. |
 | Production namespace | `capstone/k8s/overlays/production/kustomization.yaml:3` | Sets `kijani-production`. | Separates the production release. | All production resources. | Production resources collide with staging. |
 | Production config | `capstone/k8s/overlays/production/kustomization.yaml:6-15` | Generates the production ConfigMap with `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and `LOG_LEVEL`. | Production gets its own environment, bucket name, and log level. | Deployment `envFrom`. | Production runs with staging settings. |
-| Production replicas | `capstone/k8s/overlays/production/kustomization.yaml:17-19` | Three replicas. | More capacity and failure tolerance. | Production Deployment. | Production runs at staging capacity. |
-| Production labels | `capstone/k8s/overlays/production/kustomization.yaml:20-23` | Adds `environment: production`. | Makes the promotion target explicit in selectors. | Production resources. | Selectors do not distinguish environments. |
+| Production replicas | `capstone/k8s/overlays/production/kustomization.yaml:19-21` | Three replicas. | More capacity and failure tolerance. | Production Deployment. | Production runs at staging capacity. |
+| Production labels | `capstone/k8s/overlays/production/kustomization.yaml:22-25` | Adds `environment: production`. | Makes the promotion target explicit in selectors. | Production resources. | Selectors do not distinguish environments. |
 
 ## Ansible
 
@@ -148,9 +148,8 @@ component, be ready to answer five questions in this order:
 - Branch: `feature/capstone-track-a`.
 - Base branch: `develop`, which already contains the Week 5 and Week 8 merge
   commits.
-- Current pushed commit at the time this map was written:
-  `01e729c3e72a333893ceb0f8b68db81e0bfe4622`.
-- No `v1.0.0` tag exists yet. Tag the final validated commit before submission.
+- Current validated commit: `2a84c81`. Jenkins build #2 passed staging and production for `2.4.0-2a84c81`.
+- `v1.0.0` tags the final validated commit.
 - PRs #10 and #11 contain the Week 5 and Week 8 work; their commits are in
   `develop`. Verify the GitHub PR state before claiming them as merged.
 
