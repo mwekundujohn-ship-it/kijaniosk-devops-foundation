@@ -1,0 +1,6 @@
+aws_region            = "us-east-1"
+kubeconfig_path       = "~/.kube/config"
+kube_context          = "minikube"
+staging_namespace     = "kijani-staging"
+production_namespace  = "kijani-production"
+receipts_bucket_prefix = "kk-payments-receipts"

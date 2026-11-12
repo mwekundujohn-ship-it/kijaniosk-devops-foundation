@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kk-payments-alerts
+  namespace: kijani-staging
+  labels:
+    app: kk-payments
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: kk-payments.rules
+      rules:
+        - alert: KkPaymentsDeploymentUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="kijani-staging",deployment="kk-payments"} < 1
+          for: 2m
+          labels:
+            severity: critical
+            service: kk-payments
+          annotations:
+            summary: kk-payments has no available replicas
+            description: The kk-payments Deployment in kijani-staging has had fewer than one available replica for two minutes.
+        - alert: KkPaymentsPodRestarting
+          expr: increase(kube_pod_container_status_restarts_total{namespace="kijani-staging",pod=~"kk-payments-.*"}[10m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            service: kk-payments
+          annotations:
+            summary: kk-payments pod restarted
+            description: At least one kk-payments pod in kijani-staging restarted in the last ten minutes.
+        - alert: KkPaymentsServiceHasNoEndpoints
+          expr: kube_endpoint_address_available{namespace="kijani-staging",endpoint="kk-payments-service"} < 1
+          for: 2m
+          labels:
+            severity: critical
+            service: kk-payments
+          annotations:
+            summary: kk-payments Service has no endpoints
+            description: The kk-payments Service in kijani-staging has no available endpoint addresses.
