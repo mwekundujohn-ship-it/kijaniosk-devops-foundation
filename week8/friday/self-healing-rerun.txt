@@ -1,0 +1,63 @@
+==================================================================
+ KijaniKiosk Week 8 - Self-healing measurement (re-run)
+ Cluster: minikube | Namespace: default
+ Started (UTC): 2026-11-04T06:26:06Z
+==================================================================
+
+--- State before failure injection ---
+NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+kk-payments-56f76dc5f8-6wljb   1/1     Running   0          53s   10.244.0.3   minikube   <none>           <none>
+kk-payments-56f76dc5f8-wrd2j   1/1     Running   0          52s   10.244.0.4   minikube   <none>           <none>
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           53s
+
+Replica set members: kk-payments-56f76dc5f8-6wljb kk-payments-56f76dc5f8-wrd2j
+Victim pod:    kk-payments-56f76dc5f8-6wljb
+Surviving pod: kk-payments-56f76dc5f8-wrd2j
+
+T0 (UTC): 2026-11-04T06:26:06.457Z
+$ kubectl delete pod kk-payments-56f76dc5f8-6wljb --wait=false
+pod "kk-payments-56f76dc5f8-6wljb" deleted from default namespace
+
+--- Waiting for the control plane to create and ready a replacement ---
+
+T1 (UTC): 2026-11-04T06:26:08.166Z
+Replacement pod: kk-payments-56f76dc5f8-rvnz7
+Recovery time: 1.70 seconds
+
+--- State after recovery ---
+NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+kk-payments-56f76dc5f8-rvnz7   1/1     Running   0          2s    10.244.0.5   minikube   <none>           <none>
+kk-payments-56f76dc5f8-wrd2j   1/1     Running   0          54s   10.244.0.4   minikube   <none>           <none>
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           55s
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                  ENDPOINTS                         AGE
+kk-payments-service   10.244.0.4:3001,10.244.0.5:3001   45s
+
+--- Pod start times (proves the replacement is new) ---
+kk-payments-56f76dc5f8-rvnz7	2026-11-04T06:26:06Z
+kk-payments-56f76dc5f8-wrd2j	2026-11-04T06:25:14Z
+
+
+--- Replacement pod events ---
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  2s    default-scheduler  Successfully assigned default/kk-payments-56f76dc5f8-rvnz7 to minikube
+  Normal  Pulling    1s    kubelet            spec.containers{kk-payments}: Pulling image "host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4"
+  Normal  Pulled     1s    kubelet            spec.containers{kk-payments}: Successfully pulled image "host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4" in 127ms (127ms including waiting). Image size: 31151884 bytes.
+  Normal  Created    1s    kubelet            spec.containers{kk-payments}: Container created
+  Normal  Started    1s    kubelet            spec.containers{kk-payments}: Container started
+
+--- Deployment conditions ---
+Progressing=True (NewReplicaSetAvailable)
+Available=True (MinimumReplicasAvailable)
+
+--- Logs from the replacement pod ---
+kk-payments 2.4.0-d8c32f4 listening on port 3001
+
+==================================================================
+ RESULT: replica deleted at 2026-11-04T06:26:06.457Z UTC; replacement kk-payments-56f76dc5f8-rvnz7 Ready at
+ 2026-11-04T06:26:08.166Z UTC. Recovery = 1.70 seconds, with no manual action.
+==================================================================

@@ -1,0 +1,59 @@
+==================================================================
+ KijaniKiosk Week 8 - Requirement 4 - NodePort Service
+ Captured (UTC): 2026-11-04T06:26:33Z
+==================================================================
+
+--- Applied Service ---
+NAME                  TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+kk-payments-service   NodePort   10.105.47.74   <none>        3001:30001/TCP   70s   app=kk-payments
+
+Name:                     kk-payments-service
+Namespace:                default
+Labels:                   app=kk-payments
+Annotations:              <none>
+Selector:                 app=kk-payments
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.105.47.74
+IPs:                      10.105.47.74
+Port:                     http  3001/TCP
+TargetPort:               http/TCP
+NodePort:                 http  30001/TCP
+Endpoints:                10.244.0.4:3001,10.244.0.5:3001
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Internal Traffic Policy:  Cluster
+Events:                   <none>
+
+--- Endpoints (must list exactly two pod IPs) ---
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                  ENDPOINTS                         AGE
+kk-payments-service   10.244.0.4:3001,10.244.0.5:3001   70s
+
+--- EndpointSlices ---
+NAME                        ADDRESSTYPE   PORTS   ENDPOINTS               AGE
+kk-payments-service-stzd9   IPv4          3001    10.244.0.4,10.244.0.5   70s
+
+--- Pod IPs for comparison ---
+kk-payments-56f76dc5f8-rvnz7 10.244.0.5
+kk-payments-56f76dc5f8-wrd2j 10.244.0.4
+
+--- Host access through NodePort 30001 ---
+$ curl -sS http://192.168.49.2:30001/health
+{"status":"ok","service":"kk-payments","version":"2.4.0-d8c32f4"}
+$ curl -sS http://192.168.49.2:30001/health   (repeat)
+{"status":"ok","service":"kk-payments","version":"2.4.0-d8c32f4"}
+
+--- In-cluster DNS (full name) from kk-payments-56f76dc5f8-rvnz7 ---
+$ kubectl exec kk-payments-56f76dc5f8-rvnz7 -- wget -qO- http://kk-payments-service.default.svc.cluster.local:3001/health
+{"status":"ok","service":"kk-payments","version":"2.4.0-d8c32f4"}
+
+--- In-cluster DNS (short name) from kk-payments-56f76dc5f8-rvnz7 ---
+$ kubectl exec kk-payments-56f76dc5f8-rvnz7 -- wget -qO- http://kk-payments-service:3001/health
+{"status":"ok","service":"kk-payments","version":"2.4.0-d8c32f4"}
+
+--- Deployed image tag vs health version ---
+Deployment image: host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4
+Deployment tag:   2.4.0-d8c32f4
+Health version:   2.4.0-d8c32f4
