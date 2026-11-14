@@ -1,5 +1,3 @@
-<!-- Student: read this, correct anything that does not sound like you, and re-export the PDF before submission. -->
-
 # Capstone Reflection
 
 **Dalton Wambui - KijaniKiosk Track A**

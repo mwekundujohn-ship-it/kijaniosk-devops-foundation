@@ -1,7 +1,7 @@
-# KijaniKiosk Capstone — Track A
+# KijaniKiosk Capstone - Track A
 
 Track A is the infrastructure-first capstone path. This directory connects the
-existing Week 3–8 work into a staging-to-production promotion flow that can be
+existing Week 3-8 work into a staging-to-production promotion flow that can be
 demonstrated locally and explained line by line.
 
 ## Delivered connection
@@ -75,7 +75,7 @@ and runs `ansible-playbook --syntax-check` on both playbooks.
 - The Week 10 serverless receipt chain. No Week 10 specification or code exists
   in the repository. `RECEIPTS_BUCKET` is wired into the ConfigMaps but the
   Week 8 application does not consume it yet.
-- A real peer review. The request template is in `docs/peer-review-request.md`;
+- A real peer review. The request template is in `capstone/docs/peer-review-request.md`;
   a named reviewer must still complete it.
 
 ## Security notes

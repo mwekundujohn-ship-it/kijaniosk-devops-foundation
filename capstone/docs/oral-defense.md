@@ -18,7 +18,7 @@ Use this order for every line:
 Do not answer with a definition alone. The interviewer will follow up with
 "where is it used?" and "what breaks if I delete it?"
 
-## Drill 1 — Jenkins trigger
+## Drill 1 - Jenkins trigger
 
 - Line: `capstone/Jenkinsfile:15-17`.
 - Behavior: `pollSCM('H/5 * * * *')` asks Jenkins to check the SCM for changes
@@ -30,7 +30,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Follow-up: "Is this a webhook?" No. A webhook is push-based; this is polling.
   State that distinction honestly.
 
-## Drill 2 — Docker agent mounts
+## Drill 2 - Docker agent mounts
 
 - Line: `capstone/Jenkinsfile:2-7`, especially line 5.
 - Behavior: starts the `capstone-ci:1.0` container as root, uses the host
@@ -43,7 +43,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: `node: not found`, `kubectl: not found`, or certificate
   errors during cluster access.
 
-## Drill 3 — Shell strict mode
+## Drill 3 - Shell strict mode
 
 - Line: `capstone/scripts/smoke-test.sh:2`.
 - Behavior: `set -e` exits on a failed command; `set -u` exits on an unset
@@ -54,7 +54,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: a failed `curl` or a broken pipe can be ignored, producing a
   false pass.
 
-## Drill 4 — Port-forward and cleanup
+## Drill 4 - Port-forward and cleanup
 
 - Lines: `capstone/scripts/smoke-test.sh:11-21`.
 - Behavior: starts `kubectl port-forward` in the background, stores the PID, and
@@ -65,7 +65,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: the test cannot reach the Service, or repeated runs leave
   port-forward processes behind.
 
-## Drill 5 — Idempotent secret creation
+## Drill 5 - Idempotent secret creation
 
 - Lines: `capstone/scripts/create-pull-secret.sh:10-18`.
 - Behavior: generates a namespace and a Docker registry secret with
@@ -76,7 +76,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: the namespaces may not exist, or the secret is missing and the
   pods enter `ImagePullBackOff`.
 
-## Drill 6 — Kustomize overlay
+## Drill 6 - Kustomize overlay
 
 - File: `capstone/k8s/overlays/staging/kustomization.yaml`.
 - Behavior: sets the namespace, generates a hash-suffixed ConfigMap from
@@ -87,7 +87,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: staging and production either collide in one namespace or
   lose their environment-specific configuration.
 
-## Drill 7 — Deployment selector and probes
+## Drill 7 - Deployment selector and probes
 
 - Lines: `capstone/k8s/base/deployment.yaml:7-15` and `34-45`.
 - Behavior: the Deployment selects `app: kk-payments`; the pod template carries
@@ -98,7 +98,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: a selector mismatch yields zero pods; removing probes sends
   traffic to unready pods or leaves a hung pod running.
 
-## Drill 8 — Service wiring
+## Drill 8 - Service wiring
 
 - File: `capstone/k8s/base/service.yaml`.
 - Behavior: a ClusterIP Service named `kk-payments-service` selects
@@ -108,7 +108,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: the smoke test cannot resolve the Service; clients have no
   stable endpoint.
 
-## Drill 9 — Terraform state and namespaces
+## Drill 9 - Terraform state and namespaces
 
 - Files: `capstone/terraform/backend.tf` and `capstone/terraform/main.tf:17-33`.
 - Behavior: remote S3 state with locking; two `kubernetes_namespace_v1`
@@ -118,7 +118,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: state is local and lockless; the overlays fail because the
   namespaces do not exist.
 
-## Drill 10 — Build once, promote the same tag
+## Drill 10 - Build once, promote the same tag
 
 - Lines: `capstone/Jenkinsfile:30-41`, `53-63`, `74`, `96`.
 - Behavior: the tag is `package version + first seven commit characters`; the
@@ -128,7 +128,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Removal effect: production gets a different artifact or an untraceable tag,
   and rollback evidence is lost.
 
-## Drill 11 — Approval gate
+## Drill 11 - Approval gate
 
 - Lines: `capstone/Jenkinsfile:85-111`.
 - Behavior: a 15-minute `input` step pauses the pipeline, records the submitter as `APPROVER`, and writes `APPROVAL_REASON` plus the tag to `capstone/evidence/approval.txt`.
@@ -138,7 +138,7 @@ Do not answer with a definition alone. The interviewer will follow up with
 - Limitation: Jenkins in this lab has no authentication, so the gate is a
   process control, not a strong authorization control. Say that plainly.
 
-## Drill 12 — Monitoring rule
+## Drill 12 - Monitoring rule
 
 - File: `capstone/monitoring/kk-payments-alerts.yaml`.
 - Behavior: three Prometheus alerts: no available replicas, container restarts,
@@ -176,18 +176,18 @@ Do not answer with a definition alone. The interviewer will follow up with
    Service and does not expose the workload on every node.
 9. "What is the rollback command?" `kubectl rollout undo
    deployment/kk-payments -n kijani-production`.
-9a. "Why does the smoke test poll for the expected version?" A rollout can
+10. "Why does the smoke test poll for the expected version?" A rollout can
     finish while an old pod is still terminating and still receiving Service
     traffic. Polling until the expected version appears removes that race; it
     caught a real failure in build #1.
-10. "What is not production-grade here?" Single minikube cluster, local
+11. "What is not production-grade here?" Single minikube cluster, local
     registry, lab credentials, no ingress/TLS, no external secret manager, no
     real Prometheus stack, and no Week 10 receipt implementation. State these
     before the interviewer finds them.
 
 ## One-minute summary
 
-"My capstone connects the existing Weeks 3–8 work. Terraform owns the staging
+"My capstone connects the existing Weeks 3-8 work. Terraform owns the staging
 and production namespaces and the receipts bucket. Kustomize renders one base
 into two environments. Jenkins verifies the Week 5 app, builds and pushes the
 Week 8 image, deploys staging, runs a real `/health` and `/total` smoke test,
