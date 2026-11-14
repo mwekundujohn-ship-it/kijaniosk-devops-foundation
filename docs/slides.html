@@ -162,13 +162,13 @@
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">Evidence</div>
-  <h2>Build #2: the full path completed</h2>
+  <h2>Build #4: the full path completed</h2>
   <div class="two">
     <div class="card good">
       <h3>Verified</h3>
       <ul>
-        <li>Staging rollout and smoke test passed for <code>2.4.0-2a84c81</code>.</li>
-        <li>Human approval gate paused production.</li>
+        <li>Staging rollout and smoke test passed for <code>2.4.0-ec8568e</code>.</li>
+        <li>Human approval gate paused production and recorded the reason.</li>
         <li>Production rollout and smoke test passed.</li>
         <li>Evidence archived by Jenkins.</li>
       </ul>
@@ -176,10 +176,10 @@
     <div class="card">
       <h3>Artefacts</h3>
       <ul>
-        <li><code>capstone/evidence/jenkins-build-2/console.txt</code></li>
-        <li><code>staging-state.txt</code>, <code>production-state.txt</code></li>
+        <li><code>capstone/evidence/jenkins-build-4/console.txt</code></li>
+        <li><code>approval.txt</code>, <code>staging-state.txt</code>, <code>production-state.txt</code></li>
         <li><code>staging-configmap.txt</code></li>
-        <li>Live state: staging 2/2, production 3/3.</li>
+        <li>Live state: staging 2/2, production 3/3, same image tag.</li>
       </ul>
     </div>
   </div>
@@ -239,7 +239,7 @@
         <li>Week 10 receipt chain is not implemented.</li>
         <li>PrometheusRule is validated but not evaluated.</li>
         <li>DB_HOST is not consumed by a live database.</li>
-        <li>Pipeline uses pollSCM, not merge-to-main.</li>
+        <li>Pipeline uses pollSCM, not merge-to-main; Jenkins has no authentication, so the submitter records as anonymous.</li>
         <li>Peer review is still a self-review fallback.</li>
       </ul>
     </div>

@@ -1,0 +1,10 @@
+=== Image parity after Jenkins build #4 ===
+UTC 2026-11-14T08:01:44Z
+
+staging image: host.minikube.internal:5000/kk-payments:2.4.0-ec8568e
+production image: host.minikube.internal:5000/kk-payments:2.4.0-ec8568e
+
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           40h
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   3/3     3            3           40h

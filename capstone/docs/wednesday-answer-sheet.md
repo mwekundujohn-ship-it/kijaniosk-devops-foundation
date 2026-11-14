@@ -1,7 +1,7 @@
 # Wednesday answer sheet
 
 Use this as the presentation and oral-ownership cheat sheet. The verified run is
-Jenkins build **#2: SUCCESS** for tag `2.4.0-2a84c81`.
+Jenkins build **#4: SUCCESS** for tag `2.4.0-ec8568e`.
 
 ## 90-second opening
 
@@ -12,7 +12,7 @@ environment overlays. Jenkins runs lint and tests, builds one image tagged with
 the package version plus the commit SHA, pushes it, deploys staging, waits for
 rollout, and smoke-tests `/health` and `/total`. A human approval step then
 promotes the same tag to production, waits for rollout, and repeats the smoke
-test. Build #2 passed end to end; both namespaces run `2.4.0-2a84c81`.
+test. Build #4 passed end to end; both namespaces run `2.4.0-ec8568e`.
 Production is a separate namespace in the same minikube cluster, not a separate
 AWS account."
 
@@ -24,7 +24,7 @@ AWS account."
 | HEAD | `2a84c81` |
 | Jenkins job | `kijanikiosk-capstone` |
 | Verified build | `#2 SUCCESS` |
-| Promoted tag | `2.4.0-2a84c81` |
+| Promoted tag | `2.4.0-ec8568e` |
 | Staging | `kijani-staging`, 2 replicas, smoke PASS |
 | Production | `kijani-production`, 3 replicas, smoke PASS |
 | Production smoke | `PASS health`, `PASS total`, `PASS smoke test` |
@@ -36,7 +36,7 @@ AWS account."
 | --- | --- | --- |
 | What runs the pipeline? | `capstone/Jenkinsfile:2-7` | A `capstone-ci:1.0` container supplies Node, Python, kubectl, Docker, and git; it mounts the host Docker socket, kubeconfig, and minikube certificates. |
 | What starts the pipeline? | `capstone/Jenkinsfile:15-17` | `pollSCM('H/5 * * * *')` checks the branch about every five minutes. It is polling, not a webhook. |
-| How is the tag made? | `capstone/Jenkinsfile:30-41` | Read `2.4.0` from `week8/friday/package.json`, append the first seven characters of `GIT_COMMIT`, producing `2.4.0-2a84c81`. |
+| How is the tag made? | `capstone/Jenkinsfile:30-41` | Read `2.4.0` from `week8/friday/package.json`, append the first seven characters of `GIT_COMMIT`, producing `2.4.0-ec8568e`. |
 | Where is the artifact built once? | `capstone/Jenkinsfile:53-63` | Build with `APP_VERSION="$TAG"` and push once. Neither staging nor production rebuilds. |
 | How is staging deployed? | `capstone/Jenkinsfile:71-77` | `kubectl apply -k`, then `set image` to the exact tag, then `rollout status --timeout=180s`. |
 | Where is the approval gate? | `capstone/Jenkinsfile:85-111` | A 15-minute `input` step pauses before production and records `APPROVER` plus `APPROVAL_REASON` in `capstone/evidence/approval.txt`. Removing it auto-deploys every green build. |
@@ -81,10 +81,10 @@ kubectl kustomize capstone/k8s/overlays/staging | grep -E 'namespace:|name: kk-p
 kubectl kustomize capstone/k8s/overlays/production | grep -E 'namespace:|name: kk-payments-config|newTag|replicas|environment:'
 
 # Ansible deploy with the exact tested tag
-ansible-playbook -i capstone/ansible/inventory.ini capstone/ansible/staging.yml -e image_tag=2.4.0-2a84c81
+ansible-playbook -i capstone/ansible/inventory.ini capstone/ansible/staging.yml -e image_tag=2.4.0-ec8568e
 
 # Same smoke test used by Jenkins
-./capstone/scripts/smoke-test.sh kijani-production 2.4.0-2a84c81
+./capstone/scripts/smoke-test.sh kijani-production 2.4.0-ec8568e
 
 # Live state
 kubectl get deploy,rs,pods,svc,configmap -n kijani-staging -o wide

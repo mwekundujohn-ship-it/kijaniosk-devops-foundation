@@ -26,7 +26,7 @@ This log records material AI assistance on the Track A capstone. It is intention
 | **AI output** | A script that port-forwarded the Service and checked that `/health` returned HTTP 200 and `/total` returned `42`. |
 | **What the AI got wrong** | It treated "an HTTP response" as "the new release is healthy". During build #1 the new image had rolled out, but the Service still had an old pod behind it. The smoke test passed against the old version, so the release was not actually proven. |
 | **Specific human change** | Added an `EXPECTED_VERSION` argument, polled `/health` until the returned version matched the image tag, and failed the build on a mismatch. The pipeline now passes `$TAG` into `capstone/scripts/smoke-test.sh`. |
-| **Verification / evidence** | Build #1 failure and build #2 success in `capstone/evidence/jenkins-build-2/console.txt`; commit `2a84c81`; the smoke test now prints the asserted version. |
+| **Verification / evidence** | Build #1 failed on a version mismatch; build #4 succeeded in `capstone/evidence/jenkins-build-4/console.txt`; commit `ec8568e`; the smoke test prints the asserted version. |
 | **Checklist items** | #1 Human review before merge; #2 Tests and verification. |
 
 ## Entry 2 - Ansible apply reset the promoted image tag
@@ -39,7 +39,7 @@ This log records material AI assistance on the Track A capstone. It is intention
 | **AI output** | A playbook that ran `kubectl apply -k` and `kubectl rollout status`. |
 | **What the AI got wrong** | The overlay contains a placeholder image tag. `kubectl apply -k` rewrites the Deployment to that placeholder and can undo the tag that Jenkins just built and pushed. The task name said "apply the overlay", but the release intent was "deploy this exact image tag". |
 | **Specific human change** | Added an explicit `kubectl set image deployment/kk-payments kk-payments=<registry>/<image>:<tag>` task after `apply -k`, followed by `rollout status`. This makes the release tag explicit and independent of the overlay placeholder. |
-| **Verification / evidence** | Staging and production installs in the Jenkins build #2 console show `deployment.apps/kk-payments image updated` and successful rollouts; Ansible syntax checks pass. |
+| **Verification / evidence** | Staging and production installs in the Jenkins build #4 console show `deployment.apps/kk-payments image updated` and successful rollouts; Ansible syntax checks pass; build #4 archived the approval reason. |
 | **Checklist items** | #1 Human review before merge; #2 Tests and verification; #5 Traceability and attribution. |
 
 ## Entry 3 - Version metadata was conflated with runtime configuration

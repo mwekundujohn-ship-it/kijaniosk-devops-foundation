@@ -50,7 +50,7 @@ Point at the image tags. "These must match after a successful promotion; if they
 
 ## 4. Pipeline and approval (90 seconds)
 
-Open the latest successful Jenkins build. Show:
+Open Jenkins build #4 (the latest successful build). Show:
 
 - Verify stage passed.
 - One Build image and one Push image.
@@ -63,9 +63,9 @@ Open the latest successful Jenkins build. Show:
 cat capstone/evidence/demo/approval.txt
 ```
 
-Expected content: `approver`, `reason`, `tag`. Say: "The gate is not just a pause; it records who accepted the risk and why."
+Expected content: `approver`, `reason`, `tag`. Say: "The gate is not just a pause; it records the submitter Jenkins knows and the reason. Lab Jenkins has no authentication, so the submitter is anonymous; the reason and tag are still explicit."
 
-If the approval file is not present yet, use the latest archived build artefact and say so; do not claim the file exists.
+The local copy is `capstone/evidence/demo/approval.txt`; the archived source is `capstone/evidence/jenkins-build-4/approval.txt`.
 
 ## 5. Negative check (30-45 seconds)
 

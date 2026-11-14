@@ -130,7 +130,7 @@ capstone/scripts/smoke-test.sh kijani-staging <tag>
 capstone/scripts/smoke-test.sh kijani-production <tag>
 ```
 
-Jenkins build #2 is archived in `capstone/evidence/jenkins-build-2/`. It shows the staging deployment, staging smoke test, production approval gate, production deployment, and production smoke test for `2.4.0-2a84c81`. The current live state and the latest build evidence are recorded in `capstone/docs/requirement-matrix.md`.
+Jenkins build #4 is archived in `capstone/evidence/jenkins-build-4/`. It shows the staging deployment, staging smoke test, approval gate with a recorded reason, production deployment, production smoke test, and both Deployments running the same image `2.4.0-ec8568e`. The approval record is `capstone/evidence/jenkins-build-4/approval.txt`; the current live state and rubric traceability are in `capstone/docs/requirement-matrix.md`.
 
 ## Security
 

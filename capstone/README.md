@@ -63,9 +63,10 @@ and runs `ansible-playbook --syntax-check` on both playbooks.
 - Jenkinsfile syntax through the Jenkins declarative linter when Jenkins is
   running.
 - The Week 5 test suite and Week 8 image build through the local pipeline.
-- A full Jenkins build: build #2 succeeded for `2.4.0-2a84c81`, including
-  staging smoke, the production approval gate, production smoke, and archived
-  evidence in `capstone/evidence/jenkins-build-2/`.
+- A full Jenkins build: build #4 succeeded for `2.4.0-ec8568e`, including
+  staging smoke, the production approval gate with a recorded reason,
+  production smoke, and archived evidence in
+  `capstone/evidence/jenkins-build-4/`.
 
 ## What is not verified
 

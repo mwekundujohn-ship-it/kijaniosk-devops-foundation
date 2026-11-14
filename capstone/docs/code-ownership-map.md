@@ -148,7 +148,7 @@ component, be ready to answer five questions in this order:
 - Branch: `feature/capstone-track-a`.
 - Base branch: `develop`, which already contains the Week 5 and Week 8 merge
   commits.
-- Current validated commit: `2a84c81`. Jenkins build #2 passed staging and production for `2.4.0-2a84c81`.
+- Current validated commit: `ec8568e`. Jenkins build #4 passed staging and production for `2.4.0-ec8568e`.
 - `v1.0.0` tags the final validated commit.
 - PRs #10 and #11 contain the Week 5 and Week 8 work; their commits are in
   `develop`. Verify the GitHub PR state before claiming them as merged.

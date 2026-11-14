@@ -33,38 +33,35 @@
   <div class="note"><strong>What this is:</strong> a sequence of live terminal and Jenkins screenshots captured from the lab environment. It is not a Loom recording. Each page names the claim, the command, and the evidence file.</div>
   <div class="good"><strong>Claims covered:</strong> environment separation, version-aware smoke testing, a negative-check failure, pod self-healing, production health, and the Jenkins approval path.</div>
   <p><strong>Gaps still shown honestly:</strong> Week 10 serverless receipt chain is not implemented; alerts are not evaluated; production is a namespace in the same minikube cluster; peer review is a self-review fallback.</p>
-  <p class="footer">Full logs: <code>capstone/evidence/demo/</code> and <code>capstone/evidence/jenkins-build-2/</code>.</p>
+  <p class="footer">Full logs: <code>capstone/evidence/demo/</code> and <code>capstone/evidence/jenkins-build-4/</code>.</p>
 </section>
 
 <section>
   <div class="kicker">1. Jenkins pipeline</div>
-  <h2>Build #2 completed the staging-to-production path</h2>
-  <img class="shot" src="../capstone/evidence/screenshots/jenkins-build-2.png" alt="Jenkins build #2 stage view">
+  <h2>Build #4 completed the staging-to-production path</h2>
+  <img class="shot" src="../capstone/evidence/screenshots/jenkins-build-4.png" alt="Jenkins build #4 stage view">
   <p>The build page shows the stages that matter: Verify, Build image, Push image, Deploy staging, Smoke test staging, Approve production, Deploy production, and Smoke test production.</p>
-  <pre>Smoke test staging: PASS health version 2.4.0-2a84c81
-Approve production: Deploy 2.4.0-2a84c81 to production?
-Smoke test production: PASS health version 2.4.0-2a84c81
+  <pre>Smoke test staging: PASS health version 2.4.0-ec8568e
+Approve production: Deploy 2.4.0-ec8568e to production?
+Production approved by anonymous: Staging smoke passed for 2.4.0-ec8568e; approving production promotion
+Smoke test production: PASS health version 2.4.0-ec8568e
 Finished: SUCCESS</pre>
-  <p class="footer">Evidence: <code>capstone/evidence/jenkins-build-2/console.txt</code>; screenshot: <code>capstone/evidence/screenshots/jenkins-build-2.png</code>.</p>
+  <p class="footer">Evidence: <code>capstone/evidence/jenkins-build-4/console.txt</code>; screenshot: <code>capstone/evidence/screenshots/jenkins-build-4.png</code>.</p>
 </section>
 
 <section>
   <div class="kicker">2. Approval gate and production proof</div>
-  <h2>The gate paused, then production served the same tag</h2>
-  <pre>=== Jenkins build #2 approval and production proof (excerpt) ===
-[Pipeline] { (Smoke test staging)
-PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
+  <h2>The gate paused, recorded a reason, then production served the same tag</h2>
+  <img class="shot" src="../capstone/evidence/screenshots/terminal-approval-and-production-smoke.png" alt="Approval record and production smoke test">
+  <pre>approver=anonymous
+reason=Staging smoke passed for 2.4.0-ec8568e; approving production promotion
+tag=2.4.0-ec8568e
+
+PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-ec8568e"}
 PASS total: {"total": 42}
-PASS smoke test: kijani-staging/kk-payments-service
-[Pipeline] { (Approve production)
-Deploy 2.4.0-2a84c81 to production?
-[Pipeline] { (Smoke test production)
-PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
-PASS total: {"total": 42}
-PASS smoke test: kijani-production/kk-payments-service
-Finished: SUCCESS</pre>
-  <div class="note">Build #2 used the original gate. The current pipeline adds <code>APPROVER</code> and <code>APPROVAL_REASON</code> parameters and writes <code>capstone/evidence/approval.txt</code>. The refreshed build is the source of that file; do not claim it exists until the build has run.</div>
-  <p class="footer">Evidence: <code>capstone/evidence/demo/approval-build-2.txt</code>; refreshed approval evidence: <code>capstone/evidence/approval.txt</code>.</p>
+PASS smoke test: kijani-production/kk-payments-service</pre>
+  <div class="note">The reason and tag are recorded. The submitter is <code>anonymous</code> because the lab Jenkins has no authentication; that is a real limitation, not a claim of strong authorization.</div>
+  <p class="footer">Evidence: <code>capstone/evidence/jenkins-build-4/approval.txt</code>; screenshot: <code>terminal-approval-and-production-smoke.png</code>.</p>
 </section>
 
 <section>
@@ -72,15 +69,15 @@ Finished: SUCCESS</pre>
   <h2>Same workload, different environment facts</h2>
   <img class="shot" src="../capstone/evidence/screenshots/terminal-config.png" alt="Rendered staging and production ConfigMaps">
   <p>Staging and production render different <code>DB_HOST</code>, <code>NODE_ENV</code>, <code>RECEIPTS_BUCKET</code>, and replica counts. <code>APP_VERSION</code> is absent because it belongs to the image, not the ConfigMap.</p>
-  <img class="shot" src="../capstone/evidence/screenshots/terminal-cluster-state.png" alt="Staging and production cluster state">
-  <p class="footer">Evidence: <code>capstone/evidence/demo/config-render.txt</code>; screenshot: <code>capstone/evidence/screenshots/terminal-config.png</code>, <code>terminal-cluster-state.png</code>.</p>
+  <img class="shot" src="../capstone/evidence/screenshots/terminal-image-parity.png" alt="Staging and production image parity">
+  <p class="footer">Evidence: <code>capstone/evidence/demo/config-render.txt</code>, <code>image-parity.txt</code>; screenshots: <code>terminal-config.png</code>, <code>terminal-image-parity.png</code>.</p>
 </section>
 
 <section>
   <div class="kicker">4. Negative check</div>
   <h2>A wrong expected version must fail, not pass quietly</h2>
   <img class="shot" src="../capstone/evidence/screenshots/terminal-negative-smoke.png" alt="Negative smoke test failure">
-  <p>The smoke test exits non-zero and the assertion shows the actual version versus the deliberately wrong expected version. No <code>PASS</code> line is printed. This is the guardrail that build #1 exposed as necessary.</p>
+  <p>The smoke test exits non-zero and the assertion shows the actual version versus the deliberately wrong expected version. No <code>PASS</code> line is printed. This is the guardrail that build #1 exposed as necessary; the screenshot was recaptured after build #4.</p>
   <p class="footer">Evidence: <code>capstone/evidence/demo/negative-smoke.txt</code>; screenshot: <code>capstone/evidence/screenshots/terminal-negative-smoke.png</code>.</p>
 </section>
 
@@ -103,8 +100,8 @@ Finished: SUCCESS</pre>
 <section>
   <div class="kicker">6. Production proof and honest gaps</div>
   <h2>Production answers, and the limits are explicit</h2>
-  <img class="shot" src="../capstone/evidence/screenshots/terminal-production-smoke.png" alt="Production smoke test">
-  <div class="note"><strong>Do not overclaim:</strong> production is a namespace in the same minikube cluster. The PrometheusRule is validated but not evaluated. Week 10 receipt delivery is absent. The approval reason record belongs to the refreshed build, not build #2.</div>
+  <img class="shot" src="../capstone/evidence/screenshots/terminal-approval-and-production-smoke.png" alt="Approval record and production smoke test">
+  <div class="note"><strong>Do not overclaim:</strong> production is a namespace in the same minikube cluster. The PrometheusRule is validated but not evaluated. Week 10 receipt delivery is absent. Jenkins has no authentication, so the submitter is anonymous even though the reason is recorded.</div>
   <p class="footer">Evidence: <code>capstone/evidence/demo/</code>; claims and commands: <code>docs/demo-script.md</code>.</p>
 </section>
 
