@@ -1,0 +1,368 @@
+Started by user unknown or anonymous
+Checking out git file:///workspace/kijaniosk-devops-foundation into /var/jenkins_home/workspace/kijanikiosk-capstone@script/0290fbe9bff1260176251867167fb38e102f3f611142f105289c06c118e8a17f to read capstone/Jenkinsfile
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/kijanikiosk-capstone@script/0290fbe9bff1260176251867167fb38e102f3f611142f105289c06c118e8a17f/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url file:///workspace/kijaniosk-devops-foundation # timeout=10
+Fetching upstream changes from file:///workspace/kijaniosk-devops-foundation
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- file:///workspace/kijaniosk-devops-foundation +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/feature/capstone-track-a^{commit} # timeout=10
+Checking out Revision 2a84c8116fe54340c2da1e1b8724061f681cdd9b (refs/remotes/origin/feature/capstone-track-a)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2a84c8116fe54340c2da1e1b8724061f681cdd9b # timeout=10
+Commit message: "fix(capstone): make smoke test and image tag handling deterministic"
+ > git rev-list --no-walk 7c331ba7fdb6380ab571158b239087d0de3e58e6 # timeout=10
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/kijanikiosk-capstone
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Cloning repository file:///workspace/kijaniosk-devops-foundation
+ > git init /var/jenkins_home/workspace/kijanikiosk-capstone # timeout=10
+Fetching upstream changes from file:///workspace/kijaniosk-devops-foundation
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- file:///workspace/kijaniosk-devops-foundation +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url file:///workspace/kijaniosk-devops-foundation # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/origin/feature/capstone-track-a^{commit} # timeout=10
+Checking out Revision 2a84c8116fe54340c2da1e1b8724061f681cdd9b (refs/remotes/origin/feature/capstone-track-a)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2a84c8116fe54340c2da1e1b8724061f681cdd9b # timeout=10
+Commit message: "fix(capstone): make smoke test and image tag handling deterministic"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker inspect -f . localhost:5000/capstone-ci:1.0
+.
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] withDockerContainer
+Jenkins seems to be running inside container bc08bc80816e5a43ba61679b22836a8384a91444282dd0ebc7dbcc496e363ce2
+$ docker run -t -d -u 0:0 -u root --network=host -v /var/run/docker.sock:/var/run/docker.sock -v /home/user/.kube:/root/.kube:ro -v /home/user/.minikube:/home/user/.minikube:ro -w /var/jenkins_home/workspace/kijanikiosk-capstone --volumes-from bc08bc80816e5a43ba61679b22836a8384a91444282dd0ebc7dbcc496e363ce2 -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** -e ******** localhost:5000/capstone-ci:1.0 cat
+$ docker top 6b4a000017a7850b92146a64a460bf51cf54c06860f7ab3f321dc35fc3cd276e -eo pid,comm
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Version)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+[2026-11-12T16:20:30.847Z] + python3 -c 'import json; print(json.load(open('"'"'week8/friday/package.json'"'"'))['"'"'version'"'"'])'
+[Pipeline] echo
+[2026-11-12T16:20:32.044Z] Release tag: 2.4.0-2a84c81
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Verify)
+[Pipeline] dir
+[2026-11-12T16:20:34.255Z] Running in /var/jenkins_home/workspace/kijanikiosk-capstone/week5/friday/app
+[Pipeline] {
+[Pipeline] sh
+[2026-11-12T16:20:36.038Z] + npm ci --no-audit --no-fund
+[2026-11-12T16:20:45.945Z] 
+[2026-11-12T16:20:45.945Z] up to date in 6s
+[Pipeline] sh
+[2026-11-12T16:20:47.102Z] + npm run lint
+[2026-11-12T16:20:48.969Z] 
+[2026-11-12T16:20:48.970Z] > kijanikiosk-payments@1.0.0 lint
+[2026-11-12T16:20:48.970Z] > node scripts/lint.js
+[2026-11-12T16:20:48.970Z] 
+[2026-11-12T16:20:50.836Z] Lint passed: 2 source file(s) checked
+[Pipeline] sh
+[2026-11-12T16:20:51.938Z] + npm test
+[2026-11-12T16:20:53.807Z] 
+[2026-11-12T16:20:53.808Z] > kijanikiosk-payments@1.0.0 test
+[2026-11-12T16:20:53.808Z] > node scripts/test.js
+[2026-11-12T16:20:53.808Z] 
+[2026-11-12T16:20:54.065Z] ok - calculateTotal sums a single item
+[2026-11-12T16:20:54.065Z] ok - calculateTotal applies quantity to each line
+[2026-11-12T16:20:54.065Z] ok - calculateTotal handles an empty basket
+[2026-11-12T16:20:54.065Z] ok - calculateTotal rejects a negative price
+[2026-11-12T16:20:54.066Z] ok - calculateTotal rejects a fractional quantity
+[2026-11-12T16:20:54.066Z] ok - validateAmount rejects non numeric input
+[2026-11-12T16:20:54.066Z] ok - validateAmount rejects NaN
+[2026-11-12T16:20:54.066Z] ok - formatCurrency formats Kenyan shillings
+[2026-11-12T16:20:54.066Z] ok - formatCurrency rejects an unsupported currency
+[2026-11-12T16:20:54.074Z] ok - roundMoney rounds to two decimal places
+[2026-11-12T16:20:54.074Z] 
+[2026-11-12T16:20:54.074Z] 10 passed, 0 failed
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build image)
+[Pipeline] sh
+[2026-11-12T16:20:57.427Z] + docker build --no-cache --build-arg 'APP_VERSION=2.4.0-2a84c81' -f week8/friday/Dockerfile.production -t localhost:5000/kk-payments:2.4.0-2a84c81 week8/friday
+[2026-11-12T16:20:58.796Z] #0 building with "default" instance using docker driver
+[2026-11-12T16:20:58.796Z] 
+[2026-11-12T16:20:58.796Z] #1 [internal] load build definition from Dockerfile.production
+[2026-11-12T16:20:58.816Z] #1 DONE 0.0s
+[2026-11-12T16:20:58.817Z] 
+[2026-11-12T16:20:58.817Z] #1 [internal] load build definition from Dockerfile.production
+[2026-11-12T16:20:58.822Z] #1 transferring dockerfile: 873B 0.1s done
+[2026-11-12T16:20:59.076Z] #1 DONE 0.2s
+[2026-11-12T16:20:59.077Z] 
+[2026-11-12T16:20:59.077Z] #2 [internal] load metadata for docker.io/library/alpine:3.22
+[2026-11-12T16:21:02.318Z] #2 ...
+[2026-11-12T16:21:02.319Z] 
+[2026-11-12T16:21:02.321Z] #3 [internal] load metadata for docker.io/library/node:18.20.4-alpine
+[2026-11-12T16:21:02.321Z] #3 DONE 3.3s
+[2026-11-12T16:21:02.321Z] 
+[2026-11-12T16:21:02.321Z] #2 [internal] load metadata for docker.io/library/alpine:3.22
+[2026-11-12T16:21:02.876Z] #2 DONE 3.8s
+[2026-11-12T16:21:02.884Z] 
+[2026-11-12T16:21:02.884Z] #4 [internal] load .dockerignore
+[2026-11-12T16:21:02.885Z] #4 transferring context: 160B 0.0s done
+[2026-11-12T16:21:02.885Z] #4 DONE 0.1s
+[2026-11-12T16:21:03.140Z] 
+[2026-11-12T16:21:03.144Z] #5 [build 1/7] FROM docker.io/library/node:18.20.4-alpine@sha256:a25c1e4ecc284985f4cbc449021e9259560c644dd9611e5a72d9c4750f24f6c7
+[2026-11-12T16:21:03.145Z] #5 DONE 0.0s
+[2026-11-12T16:21:03.145Z] 
+[2026-11-12T16:21:03.145Z] #6 [build 2/7] WORKDIR /app
+[2026-11-12T16:21:03.146Z] #6 CACHED
+[2026-11-12T16:21:03.150Z] 
+[2026-11-12T16:21:03.150Z] #7 [stage-1 1/5] FROM docker.io/library/alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+[2026-11-12T16:21:03.151Z] #7 CACHED
+[2026-11-12T16:21:03.151Z] 
+[2026-11-12T16:21:03.151Z] #8 [internal] load build context
+[2026-11-12T16:21:03.404Z] #8 transferring context: 4.53kB 0.2s done
+[2026-11-12T16:21:03.404Z] #8 DONE 0.4s
+[2026-11-12T16:21:03.404Z] 
+[2026-11-12T16:21:03.404Z] #9 [stage-1 2/5] RUN addgroup -S -g 10001 kijani     && adduser -S -u 10001 -G kijani kijani     && apk add --no-cache nodejs
+[2026-11-12T16:21:03.967Z] #9 ...
+[2026-11-12T16:21:03.967Z] 
+[2026-11-12T16:21:03.967Z] #10 [build 3/7] COPY package.json package-lock.json ./
+[2026-11-12T16:21:03.967Z] #10 DONE 0.5s
+[2026-11-12T16:21:04.233Z] 
+[2026-11-12T16:21:04.233Z] #11 [build 4/7] RUN npm ci --no-audit --no-fund
+[2026-11-12T16:21:10.757Z] #11 ...
+[2026-11-12T16:21:10.758Z] 
+[2026-11-12T16:21:10.758Z] #9 [stage-1 2/5] RUN addgroup -S -g 10001 kijani     && adduser -S -u 10001 -G kijani kijani     && apk add --no-cache nodejs
+[2026-11-12T16:21:10.758Z] #9 3.519 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz
+[2026-11-12T16:21:10.758Z] #9 5.831 fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz
+[2026-11-12T16:21:14.009Z] #9 11.10 (1/14) Installing ca-certificates (20261020-r0)
+[2026-11-12T16:21:14.563Z] #9 11.57 (2/14) Installing libgcc (14.2.0-r6)
+[2026-11-12T16:21:14.819Z] #9 11.81 (3/14) Installing libstdc++ (14.2.0-r6)
+[2026-11-12T16:21:15.376Z] #9 12.37 (4/14) Installing ada-libs (2.9.2-r4)
+[2026-11-12T16:21:15.630Z] #9 12.68 (5/14) Installing brotli-libs (1.1.1-r0)
+[2026-11-12T16:21:16.183Z] #9 13.04 (6/14) Installing c-ares (1.34.9-r0)
+[2026-11-12T16:21:16.440Z] #9 13.30 (7/14) Installing icu-data-en (76.1-r1)
+[2026-11-12T16:21:16.998Z] #9 13.88 Executing icu-data-en-76.1-r1.post-install
+[2026-11-12T16:21:16.998Z] #9 13.93 *
+[2026-11-12T16:21:16.998Z] #9 13.93 * If you need ICU with non-English locales and legacy charset support, install
+[2026-11-12T16:21:16.998Z] #9 13.93 * package icu-data-full.
+[2026-11-12T16:21:16.998Z] #9 13.93 *
+[2026-11-12T16:21:16.998Z] #9 13.93 (8/14) Installing icu-libs (76.1-r1)
+[2026-11-12T16:21:17.934Z] #9 14.77 (9/14) Installing nghttp2-libs (1.69.0-r0)
+[2026-11-12T16:21:17.934Z] #9 15.01 (10/14) Installing simdjson (3.12.0-r0)
+[2026-11-12T16:21:18.199Z] #9 15.26 (11/14) Installing simdutf (7.2.1-r0)
+[2026-11-12T16:21:18.757Z] #9 15.63 (12/14) Installing sqlite-libs (3.49.2-r1)
+[2026-11-12T16:21:19.311Z] #9 16.13 (13/14) Installing zstd-libs (1.5.7-r0)
+[2026-11-12T16:21:19.568Z] #9 16.48 (14/14) Installing nodejs (22.23.5-r0)
+[2026-11-12T16:21:24.837Z] #9 21.63 Executing busybox-1.37.0-r20.trigger
+[2026-11-12T16:21:24.838Z] #9 21.80 Executing ca-certificates-20261020-r0.trigger
+[2026-11-12T16:21:25.413Z] #9 22.36 OK: 76 MiB in 30 packages
+[2026-11-12T16:21:26.769Z] #9 DONE 23.5s
+[2026-11-12T16:21:26.769Z] 
+[2026-11-12T16:21:26.769Z] #11 [build 4/7] RUN npm ci --no-audit --no-fund
+[2026-11-12T16:21:26.769Z] #11 ...
+[2026-11-12T16:21:26.769Z] 
+[2026-11-12T16:21:26.770Z] #12 [stage-1 3/5] WORKDIR /app
+[2026-11-12T16:21:26.770Z] #12 DONE 0.4s
+[2026-11-12T16:21:26.770Z] 
+[2026-11-12T16:21:26.770Z] #11 [build 4/7] RUN npm ci --no-audit --no-fund
+[2026-11-12T16:21:30.016Z] #11 25.91 
+[2026-11-12T16:21:30.017Z] #11 25.91 added 3 packages in 21s
+[2026-11-12T16:21:30.017Z] #11 25.92 npm notice
+[2026-11-12T16:21:30.017Z] #11 25.92 npm notice New major version of npm available! 10.7.0 -> 12.2.2
+[2026-11-12T16:21:30.017Z] #11 25.92 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+[2026-11-12T16:21:30.017Z] #11 25.92 npm notice To update run: npm install -g npm@12.2.2
+[2026-11-12T16:21:30.017Z] #11 25.92 npm notice
+[2026-11-12T16:21:30.571Z] #11 DONE 26.5s
+[2026-11-12T16:21:30.823Z] 
+[2026-11-12T16:21:30.823Z] #13 [build 5/7] COPY tsconfig.json ./
+[2026-11-12T16:21:30.823Z] #13 DONE 0.3s
+[2026-11-12T16:21:31.075Z] 
+[2026-11-12T16:21:31.075Z] #14 [build 6/7] COPY src ./src
+[2026-11-12T16:21:31.075Z] #14 DONE 0.3s
+[2026-11-12T16:21:31.329Z] 
+[2026-11-12T16:21:31.329Z] #15 [build 7/7] RUN npm run build
+[2026-11-12T16:21:39.373Z] #15 7.611 
+[2026-11-12T16:21:39.373Z] #15 7.611 > kk-payments@2.4.0 build
+[2026-11-12T16:21:39.373Z] #15 7.611 > tsc -p tsconfig.json
+[2026-11-12T16:21:39.373Z] #15 7.611 
+[2026-11-12T16:22:01.222Z] #15 DONE 27.1s
+[2026-11-12T16:22:01.223Z] 
+[2026-11-12T16:22:01.223Z] #16 [stage-1 4/5] COPY --from=build --chown=kijani:kijani /app/dist ./dist
+[2026-11-12T16:22:01.223Z] #16 DONE 0.6s
+[2026-11-12T16:22:01.223Z] 
+[2026-11-12T16:22:01.223Z] #17 [stage-1 5/5] COPY --from=build --chown=kijani:kijani /app/package.json ./package.json
+[2026-11-12T16:22:04.455Z] #17 DONE 4.3s
+[2026-11-12T16:22:04.456Z] 
+[2026-11-12T16:22:04.456Z] #18 exporting to image
+[2026-11-12T16:22:04.456Z] #18 exporting layers
+[2026-11-12T16:22:14.357Z] #18 exporting layers 8.9s done
+[2026-11-12T16:22:14.357Z] #18 writing image sha256:f44324b724f060a41375ae036ffb173c500c1a228655e41eb4cefb91d4459068
+[2026-11-12T16:22:14.357Z] #18 writing image sha256:f44324b724f060a41375ae036ffb173c500c1a228655e41eb4cefb91d4459068 0.0s done
+[2026-11-12T16:22:14.357Z] #18 naming to localhost:5000/kk-payments:2.4.0-2a84c81 0.0s done
+[2026-11-12T16:22:14.358Z] #18 DONE 9.1s
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push image)
+[Pipeline] sh
+[2026-11-12T16:22:25.384Z] + docker push localhost:5000/kk-payments:2.4.0-2a84c81
+[2026-11-12T16:22:25.385Z] The push refers to repository [localhost:5000/kk-payments]
+[2026-11-12T16:22:25.385Z] bf1a6cdaa8aa: Preparing
+[2026-11-12T16:22:25.385Z] 1116e5e72774: Preparing
+[2026-11-12T16:22:25.385Z] 751102fd160e: Preparing
+[2026-11-12T16:22:25.385Z] 676e589043a6: Preparing
+[2026-11-12T16:22:25.385Z] fdc5834cb53a: Preparing
+[2026-11-12T16:22:25.637Z] fdc5834cb53a: Layer already exists
+[2026-11-12T16:22:28.884Z] 1116e5e72774: Pushed
+[2026-11-12T16:22:29.451Z] 751102fd160e: Pushed
+[2026-11-12T16:22:29.451Z] bf1a6cdaa8aa: Pushed
+[2026-11-12T16:22:47.440Z] 676e589043a6: Pushed
+[2026-11-12T16:22:48.788Z] 2.4.0-2a84c81: digest: sha256:d07f25bfd601e2e176f9f8d4932a0702c46193ec2f1b0991fe08465a4787ce00 size: 1361
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Prepare namespaces)
+[Pipeline] sh
+[2026-11-12T16:22:52.246Z] + capstone/scripts/create-pull-secret.sh kijani-staging kijani-production
+[2026-11-12T16:22:58.729Z] namespace/kijani-staging unchanged
+[2026-11-12T16:22:59.282Z] secret/kijani-registry-credentials unchanged
+[2026-11-12T16:22:59.533Z] namespace/kijani-production unchanged
+[2026-11-12T16:23:00.086Z] secret/kijani-registry-credentials unchanged
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy staging)
+[Pipeline] sh
+[2026-11-12T16:23:01.967Z] + kubectl apply -k capstone/k8s/overlays/staging
+[2026-11-12T16:23:02.518Z] configmap/kk-payments-config-fg62k9hg6b unchanged
+[2026-11-12T16:23:02.770Z] service/kk-payments-service unchanged
+[2026-11-12T16:23:05.256Z] deployment.apps/kk-payments configured
+[Pipeline] sh
+[2026-11-12T16:23:08.748Z] + kubectl -n kijani-staging set image deployment/kk-payments 'kk-payments=host.minikube.internal:5000/kk-payments:2.4.0-2a84c81'
+[2026-11-12T16:23:08.999Z] deployment.apps/kk-payments image updated
+[Pipeline] sh
+[2026-11-12T16:23:09.371Z] + kubectl -n kijani-staging rollout status deployment/kk-payments '--timeout=180s'
+[2026-11-12T16:23:09.622Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 2 new replicas have been updated...
+[2026-11-12T16:23:10.966Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 2 new replicas have been updated...
+[2026-11-12T16:23:23.068Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 2 new replicas have been updated...
+[2026-11-12T16:23:23.068Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 2 new replicas have been updated...
+[2026-11-12T16:23:23.073Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:23:24.940Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:23:32.986Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:23:32.986Z] deployment "kk-payments" successfully rolled out
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Smoke test staging)
+[Pipeline] sh
+[2026-11-12T16:23:35.172Z] + capstone/scripts/smoke-test.sh kijani-staging 2.4.0-2a84c81
+[2026-11-12T16:23:38.406Z] PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
+[2026-11-12T16:23:38.406Z] PASS total: {"total": 42}
+[2026-11-12T16:23:38.407Z] PASS smoke test: kijani-staging/kk-payments-service
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Approve production)
+[Pipeline] timeout
+[2026-11-12T16:23:39.325Z] Timeout set to expire in 15 min
+[Pipeline] {
+[Pipeline] input
+[2026-11-12T16:23:39.720Z] Deploy 2.4.0-2a84c81 to production?
+[2026-11-12T16:23:39.721Z] Deploy or Abort
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy production)
+[Pipeline] sh
+[2026-11-12T16:26:44.850Z] + kubectl apply -k capstone/k8s/overlays/production
+[2026-11-12T16:26:48.994Z] configmap/kk-payments-config-6bcb67fg66 unchanged
+[2026-11-12T16:26:49.546Z] service/kk-payments-service unchanged
+[2026-11-12T16:26:49.798Z] deployment.apps/kk-payments unchanged
+[Pipeline] sh
+[2026-11-12T16:26:50.913Z] + kubectl -n kijani-production set image deployment/kk-payments 'kk-payments=host.minikube.internal:5000/kk-payments:2.4.0-2a84c81'
+[2026-11-12T16:26:51.833Z] deployment.apps/kk-payments image updated
+[Pipeline] sh
+[2026-11-12T16:26:53.044Z] + kubectl -n kijani-production rollout status deployment/kk-payments '--timeout=180s'
+[2026-11-12T16:26:54.397Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 3 new replicas have been updated...
+[2026-11-12T16:27:06.514Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 3 new replicas have been updated...
+[2026-11-12T16:27:06.514Z] Waiting for deployment "kk-payments" rollout to finish: 1 out of 3 new replicas have been updated...
+[2026-11-12T16:27:06.514Z] Waiting for deployment "kk-payments" rollout to finish: 2 out of 3 new replicas have been updated...
+[2026-11-12T16:27:10.650Z] Waiting for deployment "kk-payments" rollout to finish: 2 out of 3 new replicas have been updated...
+[2026-11-12T16:27:20.541Z] Waiting for deployment "kk-payments" rollout to finish: 2 out of 3 new replicas have been updated...
+[2026-11-12T16:27:20.541Z] Waiting for deployment "kk-payments" rollout to finish: 2 out of 3 new replicas have been updated...
+[2026-11-12T16:27:20.541Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:27:23.035Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:27:31.067Z] Waiting for deployment "kk-payments" rollout to finish: 1 old replicas are pending termination...
+[2026-11-12T16:27:31.068Z] deployment "kk-payments" successfully rolled out
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Smoke test production)
+[Pipeline] sh
+[2026-11-12T16:27:31.722Z] + capstone/scripts/smoke-test.sh kijani-production 2.4.0-2a84c81
+[2026-11-12T16:27:33.066Z] PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
+[2026-11-12T16:27:33.066Z] PASS total: {"total": 42}
+[2026-11-12T16:27:33.066Z] PASS smoke test: kijani-production/kk-payments-service
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] sh
+[2026-11-12T16:27:33.707Z] + mkdir -p capstone/evidence
+[Pipeline] sh
+[2026-11-12T16:27:34.061Z] + kubectl get all -n kijani-staging
+[Pipeline] sh
+[2026-11-12T16:27:34.638Z] + kubectl get all -n kijani-production
+[Pipeline] sh
+[2026-11-12T16:27:35.213Z] + kubectl get configmap -n kijani-staging -l 'app=kk-payments' -o yaml
+[Pipeline] archiveArtifacts
+[2026-11-12T16:27:35.563Z] Archiving artifacts
+[Pipeline] cleanWs
+[2026-11-12T16:27:35.693Z] [WS-CLEANUP] Deleting project workspace...
+[2026-11-12T16:27:35.693Z] [WS-CLEANUP] Deferred wipeout is used...
+[2026-11-12T16:27:35.718Z] [WS-CLEANUP] done
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+$ docker stop --time=1 6b4a000017a7850b92146a64a460bf51cf54c06860f7ab3f321dc35fc3cd276e
+$ docker rm -f --volumes 6b4a000017a7850b92146a64a460bf51cf54c06860f7ab3f321dc35fc3cd276e
+[Pipeline] // withDockerContainer
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

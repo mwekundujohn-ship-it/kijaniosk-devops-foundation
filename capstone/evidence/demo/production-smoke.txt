@@ -1,0 +1,6 @@
+=== Production smoke test after build #4 ===
+UTC 2026-11-14T08:01:47Z
+TAG=2.4.0-ec8568e
+PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-ec8568e"}
+PASS total: {"total": 42}
+PASS smoke test: kijani-production/kk-payments-service

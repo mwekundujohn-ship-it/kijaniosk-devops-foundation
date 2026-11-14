@@ -1,0 +1,10 @@
+=== Negative smoke test after build #4: wrong expected version must fail ===
+UTC 2026-11-14T08:03:31Z
+Command: capstone/scripts/smoke-test.sh kijani-production deliberately-wrong-version
+
+Traceback (most recent call last):
+  File "<stdin>", line 9, in <module>
+AssertionError: ({'status': 'ok', 'service': 'kk-payments', 'version': '2.4.0-ec8568e'}, 'deliberately-wrong-version')
+
+Exit code: 1
+RESULT: expected non-zero exit; the check rejected the mismatched version

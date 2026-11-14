@@ -1,0 +1,16 @@
+=== capstone/scripts/verify.sh ===
+UTC 2026-11-14T07:38:38Z
+
+[32m[1mSuccess![0m The configuration is valid.
+[0m
+PASS yaml: /tmp/capstone-staging.yaml 3 documents
+PASS yaml: /tmp/capstone-production.yaml 3 documents
+PASS yaml: capstone/monitoring/kk-payments-alerts.yaml 1 documents
+PASS bash: capstone/scripts/create-pull-secret.sh
+PASS bash: capstone/scripts/local-pipeline.sh
+PASS bash: capstone/scripts/smoke-test.sh
+PASS bash: capstone/scripts/verify.sh
+
+playbook: /home/user/Projects/kijaniosk-devops-foundation/capstone/ansible/staging.yml
+
+playbook: /home/user/Projects/kijaniosk-devops-foundation/capstone/ansible/production.yml

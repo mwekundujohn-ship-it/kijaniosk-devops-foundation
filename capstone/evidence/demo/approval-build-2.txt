@@ -1,0 +1,30 @@
+=== Jenkins build #2 approval and production proof (excerpt) ===
+[Pipeline] { (Smoke test staging)
+[Pipeline] sh
+[2026-11-12T16:23:35.172Z] + capstone/scripts/smoke-test.sh kijani-staging 2.4.0-2a84c81
+[2026-11-12T16:23:38.406Z] PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
+[2026-11-12T16:23:38.406Z] PASS total: {"total": 42}
+[2026-11-12T16:23:38.407Z] PASS smoke test: kijani-staging/kk-payments-service
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Approve production)
+[Pipeline] timeout
+[2026-11-12T16:23:39.325Z] Timeout set to expire in 15 min
+[Pipeline] {
+[Pipeline] input
+[2026-11-12T16:23:39.720Z] Deploy 2.4.0-2a84c81 to production?
+[2026-11-12T16:23:39.721Z] Deploy or Abort
+[Pipeline] }
+[Pipeline] // timeout
+
+[Pipeline] { (Smoke test production)
+[Pipeline] sh
+[2026-11-12T16:27:31.722Z] + capstone/scripts/smoke-test.sh kijani-production 2.4.0-2a84c81
+[2026-11-12T16:27:33.066Z] PASS health: {"service": "kk-payments", "status": "ok", "version": "2.4.0-2a84c81"}
+[2026-11-12T16:27:33.066Z] PASS total: {"total": 42}
+[2026-11-12T16:27:33.066Z] PASS smoke test: kijani-production/kk-payments-service
+
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

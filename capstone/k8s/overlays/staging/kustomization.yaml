@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kijani-staging
+resources:
+  - ../../base
+configMapGenerator:
+  - name: kk-payments-config
+    literals:
+      - NODE_ENV=staging
+      - PORT=3001
+      - DB_HOST=kk-payments-db.kijani-staging.svc.cluster.local
+      - RECEIPTS_BUCKET=kk-payments-receipts-staging-545572979505
+      - LOG_LEVEL=debug
+    options:
+      labels:
+        app: kk-payments
+images:
+  - name: host.minikube.internal:5000/kk-payments
+    newTag: 2.4.0-d8c32f4
+replicas:
+  - name: kk-payments
+    count: 2
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: true

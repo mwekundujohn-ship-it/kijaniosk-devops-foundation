@@ -1,0 +1,43 @@
+---
+- name: Apply the KijaniKiosk production overlay
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    kubeconfig: "{{ lookup('env', 'HOME') }}/.kube/config"
+    overlay: "{{ playbook_dir }}/../k8s/overlays/production"
+
+  tasks:
+    - name: Check that the kubeconfig exists
+      ansible.builtin.stat:
+        path: "{{ kubeconfig }}"
+      register: kubeconfig_stat
+      failed_when: not kubeconfig_stat.stat.exists
+
+    - name: Apply the production manifests
+      ansible.builtin.command:
+        cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} apply -k {{ overlay }}"
+      register: apply_result
+      changed_when: "'created' in apply_result.stdout or 'configured' in apply_result.stdout"
+
+    - name: Set the production image tag
+      ansible.builtin.command:
+        cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} -n {{ production_namespace }} set image deployment/kk-payments kk-payments={{ image_registry }}/{{ image_repository }}:{{ image_tag }}"
+      register: image_result
+      changed_when: "'image updated' in image_result.stdout"
+
+    - name: Wait for the production rollout
+      ansible.builtin.command:
+        cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} -n {{ production_namespace }} rollout status deployment/kk-payments --timeout=180s"
+      changed_when: false
+
+    - name: Read the applied production ConfigMap names
+      ansible.builtin.command:
+        cmd: "kubectl --kubeconfig {{ kubeconfig }} --context {{ kube_context }} -n {{ production_namespace }} get configmap -l app=kk-payments -o name"
+      register: configmaps
+      changed_when: false
+
+    - name: Show the production ConfigMap names
+      ansible.builtin.debug:
+        var: configmaps.stdout_lines

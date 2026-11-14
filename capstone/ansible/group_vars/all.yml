@@ -1,0 +1,6 @@
+kube_context: minikube
+staging_namespace: kijani-staging
+production_namespace: kijani-production
+image_registry: host.minikube.internal:5000
+image_repository: kk-payments
+image_tag: 2.4.0-d8c32f4

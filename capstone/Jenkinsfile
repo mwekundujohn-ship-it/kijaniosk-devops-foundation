@@ -1,0 +1,138 @@
+pipeline {
+  agent {
+    docker {
+      image 'localhost:5000/capstone-ci:1.0'
+      args '-u root --network=host -v /var/run/docker.sock:/var/run/docker.sock -v /home/user/.kube:/root/.kube:ro -v /home/user/.minikube:/home/user/.minikube:ro'
+    }
+  }
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  triggers {
+    pollSCM('H/5 * * * *')
+  }
+
+  environment {
+    REGISTRY          = 'localhost:5000'
+    CLUSTER_REGISTRY  = 'host.minikube.internal:5000'
+    IMAGE             = 'kk-payments'
+    STAGING_NS        = 'kijani-staging'
+    PRODUCTION_NS     = 'kijani-production'
+    APP_DIR           = 'week5/friday/app'
+    IMAGE_DIR         = 'week8/friday'
+  }
+
+  stages {
+    stage('Version') {
+      steps {
+        script {
+          def base = sh(
+            script: "python3 -c \"import json; print(json.load(open('${env.IMAGE_DIR}/package.json'))['version'])\"",
+            returnStdout: true
+          ).trim()
+          env.TAG = "${base}-${env.GIT_COMMIT.take(7)}"
+          echo "Release tag: ${env.TAG}"
+        }
+      }
+    }
+
+    stage('Verify') {
+      steps {
+        dir("${env.APP_DIR}") {
+          sh 'npm ci --no-audit --no-fund'
+          sh 'npm run lint'
+          sh 'npm test'
+        }
+      }
+    }
+
+    stage('Build image') {
+      steps {
+        sh 'docker build --no-cache --build-arg APP_VERSION="$TAG" -f "$IMAGE_DIR/Dockerfile.production" -t "$REGISTRY/$IMAGE:$TAG" "$IMAGE_DIR"'
+      }
+    }
+
+    stage('Push image') {
+      steps {
+        sh 'docker push "$REGISTRY/$IMAGE:$TAG"'
+      }
+    }
+
+    stage('Prepare namespaces') {
+      steps {
+        sh 'capstone/scripts/create-pull-secret.sh "$STAGING_NS" "$PRODUCTION_NS"'
+      }
+    }
+
+    stage('Deploy staging') {
+      steps {
+        sh 'kubectl apply -k capstone/k8s/overlays/staging'
+        sh 'kubectl -n "$STAGING_NS" set image deployment/kk-payments kk-payments="$CLUSTER_REGISTRY/$IMAGE:$TAG"'
+        sh 'kubectl -n "$STAGING_NS" rollout status deployment/kk-payments --timeout=180s'
+      }
+    }
+
+    stage('Smoke test staging') {
+      steps {
+        sh 'capstone/scripts/smoke-test.sh "$STAGING_NS" "$TAG"'
+      }
+    }
+
+    stage('Approve production') {
+      steps {
+        script {
+          timeout(time: 15, unit: 'MINUTES') {
+            def approval = input(
+              message: "Deploy ${env.TAG} to production?",
+              ok: 'Deploy',
+              submitterParameter: 'APPROVER',
+              parameters: [
+                string(
+                  name: 'APPROVAL_REASON',
+                  defaultValue: 'Staging smoke test passed',
+                  description: 'Why is this release safe to promote to production?'
+                )
+              ]
+            )
+            env.APPROVER = approval['APPROVER'] ?: 'unknown'
+            env.APPROVAL_REASON = approval['APPROVAL_REASON'] ?: '(not supplied)'
+            echo "Production approved by ${env.APPROVER}: ${env.APPROVAL_REASON}"
+            writeFile(
+              file: 'capstone/evidence/approval.txt',
+              text: "approver=${env.APPROVER}\nreason=${env.APPROVAL_REASON}\ntag=${env.TAG}\n"
+            )
+          }
+        }
+      }
+    }
+
+    stage('Deploy production') {
+      steps {
+        sh 'kubectl apply -k capstone/k8s/overlays/production'
+        sh 'kubectl -n "$PRODUCTION_NS" set image deployment/kk-payments kk-payments="$CLUSTER_REGISTRY/$IMAGE:$TAG"'
+        sh 'kubectl -n "$PRODUCTION_NS" rollout status deployment/kk-payments --timeout=180s'
+      }
+    }
+
+    stage('Smoke test production') {
+      steps {
+        sh 'capstone/scripts/smoke-test.sh "$PRODUCTION_NS" "$TAG"'
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'mkdir -p capstone/evidence'
+      sh 'kubectl get all -n "$STAGING_NS" > capstone/evidence/staging-state.txt || true'
+      sh 'kubectl get all -n "$PRODUCTION_NS" > capstone/evidence/production-state.txt || true'
+      sh 'kubectl get configmap -n "$STAGING_NS" -l app=kk-payments -o yaml > capstone/evidence/staging-configmap.txt || true'
+      archiveArtifacts artifacts: 'capstone/evidence/*.txt', allowEmptyArchive: true
+      cleanWs()
+    }
+  }
+}

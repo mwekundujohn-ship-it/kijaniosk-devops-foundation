@@ -1,0 +1,32 @@
+=== KijaniKiosk pod self-healing demo ===
+UTC 2026-11-14T07:37:20Z
+
+--- before ---
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           39h
+NAME                           READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+kk-payments-7d68d875c8-8vh2r   1/1     Running   0          39h   10.244.0.28   minikube   <none>           <none>
+kk-payments-7d68d875c8-bl6zc   1/1     Running   0          39h   10.244.0.27   minikube   <none>           <none>
+
+Deleting pod: kk-payments-7d68d875c8-8vh2r
+pod "kk-payments-7d68d875c8-8vh2r" deleted from kijani-staging namespace
+
+--- immediately after delete ---
+NAME                           READY   STATUS              RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+kk-payments-7d68d875c8-8vh2r   1/1     Terminating         0          39h   10.244.0.28   minikube   <none>           <none>
+kk-payments-7d68d875c8-bl6zc   1/1     Running             0          39h   10.244.0.27   minikube   <none>           <none>
+kk-payments-7d68d875c8-xttk8   0/1     ContainerCreating   0          1s    <none>        minikube   <none>           <none>
+
+--- waiting for Deployment availability ---
+Waiting for deployment "kk-payments" rollout to finish: 1 of 2 updated replicas are available...
+Waiting for deployment "kk-payments" rollout to finish: 1 of 2 updated replicas are available...
+deployment "kk-payments" successfully rolled out
+
+--- after self-healing ---
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           39h
+NAME                           READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+kk-payments-7d68d875c8-bl6zc   1/1     Running   0          39h   10.244.0.27   minikube   <none>           <none>
+kk-payments-7d68d875c8-xttk8   1/1     Running   0          16s   10.244.0.29   minikube   <none>           <none>
+
+Replacement proved: Deployment returned to 2/2 available without a manual rollout.

@@ -1,0 +1,23 @@
+=== Rendered environment configuration ===
+UTC 2026-11-14T07:40:47Z
+
+--- staging ---
+ConfigMap: kk-payments-config-td296mh6fh
+  DB_HOST=kk-payments-db.kijani-staging.svc.cluster.local
+  LOG_LEVEL=debug
+  NODE_ENV=staging
+  PORT=3001
+  RECEIPTS_BUCKET=kk-payments-receipts-staging-545572979505
+Deployment replicas: 2
+Deployment image: host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4
+
+--- production ---
+ConfigMap: kk-payments-config-5h5md8bgcm
+  DB_HOST=kk-payments-db.kijani-production.svc.cluster.local
+  LOG_LEVEL=info
+  NODE_ENV=production
+  PORT=3001
+  RECEIPTS_BUCKET=kk-payments-receipts-production-545572979505
+Deployment replicas: 3
+Deployment image: host.minikube.internal:5000/kk-payments:2.4.0-d8c32f4
+

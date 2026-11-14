@@ -1,0 +1,134 @@
+digraph kijanikiosk_capstone {
+  graph [
+    rankdir=LR,
+    bgcolor="white",
+    fontname="Helvetica",
+    fontsize=18,
+    labelloc="t",
+    label="KijaniKiosk Track A - implemented architecture and labelled data flow\nSolid = implemented and exercised; dashed red = not implemented or not evaluated",
+    pad="0.35",
+    nodesep="0.35",
+    ranksep="0.55"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Helvetica",
+    fontsize=11,
+    margin="0.14,0.08",
+    color="#4a5568",
+    fillcolor="#edf2f7"
+  ];
+
+  edge [
+    fontname="Helvetica",
+    fontsize=9,
+    color="#2d3748",
+    arrowsize=0.7
+  ];
+
+  subgraph cluster_source {
+    label="Source of truth";
+    color="#cbd5e0";
+    style="rounded,dashed";
+    developer [label="Developer\nworkspace", fillcolor="#e6fffa"];
+    github [label="GitHub repository\nfeature/capstone-track-a\nannotated tag v1.0.0", fillcolor="#e6fffa"];
+  }
+
+  subgraph cluster_iac {
+    label="Infrastructure as code";
+    color="#cbd5e0";
+    style="rounded,dashed";
+    terraform [label="Terraform\nnamespaces + S3 receipts buckets", fillcolor="#fefcbf"];
+    kustomize [label="Kustomize\nbase + staging/production overlays", fillcolor="#fefcbf"];
+    ansible [label="Ansible\napply overlay, set image, wait for rollout", fillcolor="#fefcbf"];
+    tfstate [label="S3 remote state\ncapstone/track-a/terraform.tfstate", fillcolor="#fffaf0"];
+  }
+
+  subgraph cluster_ci {
+    label="Jenkins CI/CD";
+    color="#cbd5e0";
+    style="rounded,dashed";
+    jenkins [label="Jenkins controller\npollSCM every 5 minutes", fillcolor="#bee3f8"];
+    agent [label="CI agent container\nlocalhost:5000/capstone-ci:1.0", fillcolor="#bee3f8"];
+    verify [label="Verify\nnpm ci + lint + test", fillcolor="#bee3f8"];
+    build [label="Build image\nDockerfile.production", fillcolor="#bee3f8"];
+    push [label="Push image\nlocalhost:5000/kk-payments:TAG", fillcolor="#bee3f8"];
+    smoke [label="Smoke test\n/health and /total", fillcolor="#bee3f8"];
+    approval [label="Human approval gate\napprover + reason recorded", fillcolor="#fed7d7"];
+  }
+
+  registry [label="Local container registry\nlocalhost:5000\n(cluster: host.minikube.internal:5000)", fillcolor="#e9d8fd"];
+
+  subgraph cluster_cluster {
+    label="minikube cluster (namespace isolation only)";
+    color="#cbd5e0";
+    style="rounded,dashed";
+
+    subgraph cluster_staging {
+      label="kijani-staging";
+      color="#9ae6b4";
+      style="rounded";
+      sts [label="Deployment kk-payments\n2 replicas", fillcolor="#c6f6d5"];
+      stsvc [label="Service kk-payments-service\nClusterIP :3001 -> targetPort http", fillcolor="#c6f6d5"];
+      stcm [label="ConfigMap\nNODE_ENV=staging\nDB_HOST=...staging...\nRECEIPTS_BUCKET=...staging...", fillcolor="#c6f6d5"];
+    }
+
+    subgraph cluster_production {
+      label="kijani-production";
+      color="#feb2b2";
+      style="rounded";
+      prd [label="Deployment kk-payments\n3 replicas", fillcolor="#fed7d7"];
+      prdsvc [label="Service kk-payments-service\nClusterIP :3001 -> targetPort http", fillcolor="#fed7d7"];
+      prdcm [label="ConfigMap\nNODE_ENV=production\nDB_HOST=...production...\nRECEIPTS_BUCKET=...production...", fillcolor="#fed7d7"];
+    }
+  }
+
+  subgraph cluster_obs {
+    label="Operations (partially configured)";
+    color="#cbd5e0";
+    style="rounded,dashed";
+    promrule [label="PrometheusRule\n3 kk-payments alert rules", fillcolor="#e2e8f0"];
+    prom [label="Prometheus Operator +\nkube-state-metrics", fillcolor="#e2e8f0"];
+    s3st [label="S3 receipts bucket\nstaging", fillcolor="#fffaf0"];
+    s3pr [label="S3 receipts bucket\nproduction", fillcolor="#fffaf0"];
+  }
+
+  developer -> github [label="commit + push"];
+  github -> jenkins [label="pollSCM detects commit"];
+  jenkins -> agent [label="runs pipeline stages"];
+  agent -> verify [label="checkout + run app tests"];
+  verify -> build [label="tests pass"];
+  build -> push [label="image layers"];
+  push -> registry [label="docker push"];
+  registry -> sts [label="image pull\n2.4.0-COMMIT"];
+  registry -> prd [label="image pull\nsame promoted image"];
+
+  github -> kustomize [label="manifests at commit"];
+  kustomize -> ansible [label="rendered overlay"];
+  terraform -> sts [label="creates namespace"];
+  terraform -> prd [label="creates namespace"];
+  terraform -> tfstate [label="read/write state"];
+  terraform -> s3st [label="creates private, versioned, SSE-S3 bucket"];
+  terraform -> s3pr [label="creates private, versioned, SSE-S3 bucket"];
+
+  ansible -> sts [label="kubectl apply -k + set image"];
+  ansible -> prd [label="kubectl apply -k + set image"];
+  stcm -> sts [label="envFrom configMapRef"];
+  prdcm -> prd [label="envFrom configMapRef"];
+  stsvc -> sts [label="selector app=kk-payments"];
+  prdsvc -> prd [label="selector app=kk-payments"];
+
+  stsvc -> smoke [label="kubectl port-forward\nHTTP /health + /total"];
+  smoke -> approval [label="staging release proves health"];
+  approval -> prd [label="approved promotion\nthen rollout status"];
+  prdsvc -> smoke [label="production HTTP check"];
+
+  promrule -> prom [label="requires CRD + metrics", style=dashed, color="#c53030", fontcolor="#c53030"];
+  s3st -> stc [label="Week 10 receipt writer", style=dashed, color="#c53030", fontcolor="#c53030"];
+  s3pr -> prc [label="Week 10 receipt writer", style=dashed, color="#c53030", fontcolor="#c53030"];
+
+  stc [label="Week 10 serverless\ndoes not exist", shape=box, style="rounded,dashed", color="#c53030", fontcolor="#c53030", fillcolor="#fff5f5"];
+  prc [label="Week 10 serverless\ndoes not exist", shape=box, style="rounded,dashed", color="#c53030", fontcolor="#c53030", fillcolor="#fff5f5"];
+}
