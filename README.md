@@ -93,13 +93,13 @@ commit -> pollSCM -> Verify (npm ci, lint, test)
        -> Build image -> Push to local registry
        -> Deploy staging -> set image -> rollout status
        -> Smoke test staging (assert expected version + total=42)
-       -> Human approval (records approver + reason)
+       -> Human approval (records Jenkins submitter + reason)
        -> Deploy production -> set image -> rollout status
        -> Smoke test production
        -> Archive evidence
 ```
 
-The same image tag must appear in both namespaces. The approval record is written to `capstone/evidence/approval.txt` and archived with the build. The pipeline is designed to fail before production if staging is unhealthy or the version assertion fails.
+The same image tag must appear in both namespaces. The approval record is written to `capstone/evidence/approval.txt` in the build workspace and archived as `capstone/evidence/jenkins-build-4/approval.txt`. The pipeline is designed to fail before production if staging is unhealthy or the version assertion fails.
 
 ## Configuration
 

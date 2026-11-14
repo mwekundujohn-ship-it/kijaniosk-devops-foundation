@@ -32,7 +32,7 @@ Status values: `VERIFIED`, `PARTIAL`, `MISSING`, `USER-OWNED`.
 ## Evidence paths
 
 - Submission deliverables: `docs/scope.pdf`, `docs/architecture.png`, `docs/ai-governance-log.md`, `docs/test-plan.md`, `docs/peer-feedback-log.md`, `docs/slides.pdf`, `docs/reflection.pdf`, `docs/demo-script.md`.
-- Capstone demo evidence: `capstone/evidence/demo/` (`fault-handling.txt`, `negative-smoke.txt`, `config-render.txt`, `verify.txt`, `secret-scan.txt`).
+- Capstone demo evidence: `capstone/evidence/demo/` (`fault-handling.txt`, `negative-smoke.txt`, `config-render.txt`, `image-parity.txt`, `production-smoke.txt`, `approval.txt`, `verify.txt`, `secret-scan.txt`).
 
 - Jenkins build #4: `capstone/evidence/jenkins-build-4/` (`console.txt`, `build.json`, `approval.txt`, namespace state, staging ConfigMap).
 - Jenkins build #2 (superseded): `capstone/evidence/jenkins-build-2/`.
