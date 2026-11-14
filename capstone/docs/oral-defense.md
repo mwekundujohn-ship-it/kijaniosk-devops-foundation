@@ -130,11 +130,11 @@ Do not answer with a definition alone. The interviewer will follow up with
 
 ## Drill 11 — Approval gate
 
-- Lines: `capstone/Jenkinsfile:85-91`.
-- Behavior: a 15-minute `input` step pauses the pipeline.
-- Purpose: production promotion is deliberate.
-- Consumer: the production deploy stage.
-- Removal effect: every green build deploys production automatically.
+- Lines: `capstone/Jenkinsfile:85-111`.
+- Behavior: a 15-minute `input` step pauses the pipeline, records the submitter as `APPROVER`, and writes `APPROVAL_REASON` plus the tag to `capstone/evidence/approval.txt`.
+- Purpose: production promotion is deliberate and auditable.
+- Consumer: the production deploy stage and the evidence archive.
+- Removal effect: every green build deploys production automatically, and there is no record of who approved or why.
 - Limitation: Jenkins in this lab has no authentication, so the gate is a
   process control, not a strong authorization control. Say that plainly.
 
@@ -166,8 +166,8 @@ Do not answer with a definition alone. The interviewer will follow up with
 5. "Why a ConfigMap instead of baking environment values into the image?" The
    same image is promoted; environment differences belong in configuration.
    `APP_VERSION` is the exception: it identifies the immutable artifact, so it
-   is baked in at build time. `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, and
-   `LOG_LEVEL` are runtime configuration.
+   is baked in at build time. `NODE_ENV`, `PORT`, `DB_HOST`, `RECEIPTS_BUCKET`,
+   and `LOG_LEVEL` are runtime configuration.
 6. "Why does the ConfigMap name have a hash?" Kustomize appends a content hash
    and rewrites the Deployment reference, so a config change triggers a rollout.
 7. "Why `imagePullPolicy: Always`?" The lab reuses tags during development; the

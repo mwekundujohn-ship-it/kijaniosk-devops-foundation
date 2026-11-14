@@ -14,8 +14,8 @@ demonstrated locally and explained line by line.
 4. The Jenkins pipeline verifies the Week 5 application, builds and pushes the
    Week 8 production image, deploys staging, runs a smoke test, waits for a
    human approval, then promotes the same image to production.
-5. A PrometheusRule describes the two minimum operational signals for
-   `kk-payments`: no available replicas and container restarts.
+5. A PrometheusRule describes the operational signals for `kk-payments`: no
+   available replicas, container restarts, and missing Service endpoints.
 
 ## Promotion flow
 

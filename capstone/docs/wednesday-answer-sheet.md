@@ -39,17 +39,17 @@ AWS account."
 | How is the tag made? | `capstone/Jenkinsfile:30-41` | Read `2.4.0` from `week8/friday/package.json`, append the first seven characters of `GIT_COMMIT`, producing `2.4.0-2a84c81`. |
 | Where is the artifact built once? | `capstone/Jenkinsfile:53-63` | Build with `APP_VERSION="$TAG"` and push once. Neither staging nor production rebuilds. |
 | How is staging deployed? | `capstone/Jenkinsfile:71-77` | `kubectl apply -k`, then `set image` to the exact tag, then `rollout status --timeout=180s`. |
-| Where is the approval gate? | `capstone/Jenkinsfile:85-91` | A 15-minute `input` step pauses before production. Removing it auto-deploys every green build. |
-| How is production promoted? | `capstone/Jenkinsfile:93-103` | Apply the production overlay, set the same tag, wait for rollout, run the same smoke test. |
-| Where is evidence archived? | `capstone/Jenkinsfile:108-117` | Writes staging/production state and the staging ConfigMap to `capstone/evidence/` and archives them. |
+| Where is the approval gate? | `capstone/Jenkinsfile:85-111` | A 15-minute `input` step pauses before production and records `APPROVER` plus `APPROVAL_REASON` in `capstone/evidence/approval.txt`. Removing it auto-deploys every green build. |
+| How is production promoted? | `capstone/Jenkinsfile:113-119` | Apply the production overlay, set the same tag, wait for rollout, run the same smoke test. |
+| Where is evidence archived? | `capstone/Jenkinsfile:128-137` | Writes staging/production state, the staging ConfigMap, and the approval record to `capstone/evidence/` and archives them. |
 | Where is remote state? | `capstone/terraform/backend.tf:2-5` | S3 state at `capstone/track-a/terraform.tfstate` with locking. |
 | Where are namespaces created? | `capstone/terraform/main.tf:17-33` | `kubernetes_namespace_v1` for `kijani-staging` and `kijani-production`. |
 | Where are receipts buckets created? | `capstone/terraform/main.tf:11-45` | One account-suffixed bucket per environment. |
 | Where are buckets protected? | `capstone/terraform/main.tf:47-77` | Versioning, SSE-S3, and a full public-access block. |
-| Where is the staging ConfigMap? | `capstone/k8s/overlays/staging/kustomization.yaml:6-15` | Generates `NODE_ENV`, `PORT`, `RECEIPTS_BUCKET`, `LOG_LEVEL` with a content hash in the name. |
-| Where is the image tag overridden? | `capstone/k8s/overlays/staging/kustomization.yaml:16-18`; production `:16-18` | The overlay has a safe default; Jenkins/Ansible set the release tag after apply. |
-| Where are replicas set? | `capstone/k8s/overlays/staging/kustomization.yaml:19-21`; production `:19-21` | Staging 2, production 3. |
-| Where is the environment label? | `capstone/k8s/overlays/staging/kustomization.yaml:22-25`; production `:22-25` | Adds `environment` to selectors. |
+| Where is the staging ConfigMap? | `capstone/k8s/overlays/staging/kustomization.yaml:6-16` | Generates `NODE_ENV`, `PORT`, `DB_HOST`, `RECEIPTS_BUCKET`, `LOG_LEVEL` with a content hash in the name. |
+| Where is the image tag overridden? | `capstone/k8s/overlays/staging/kustomization.yaml:17-19`; production `:17-19` | The overlay has a safe default; Jenkins/Ansible set the release tag after apply. |
+| Where are replicas set? | `capstone/k8s/overlays/staging/kustomization.yaml:20-22`; production `:20-22` | Staging 2, production 3. |
+| Where is the environment label? | `capstone/k8s/overlays/staging/kustomization.yaml:23-26`; production `:23-26` | Adds `environment` to selectors. |
 | Where are probes? | `capstone/k8s/base/deployment.yaml:34-45` | Readiness and liveness both GET `/health` on named port `http`. |
 | Where is the Service selector? | `capstone/k8s/base/service.yaml:8-14` | ClusterIP, selects `app: kk-payments`, port 3001 to named port `http`. |
 | Where is the image tag enforced in Ansible? | `capstone/ansible/staging.yml:24-28`; production `:24-28` | `kubectl set image` after `apply -k`; otherwise apply resets the tag to the overlay default. |

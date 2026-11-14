@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KijaniKiosk Track A Capstone</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "DejaVu Sans", Arial, sans-serif; color: #1a202c; }
+  section.slide {
+    width: 297mm; height: 210mm; padding: 14mm 16mm 12mm;
+    page-break-after: always; break-after: page; position: relative;
+    background: #ffffff; overflow: hidden;
+  }
+  section.slide:last-child { page-break-after: auto; break-after: auto; }
+  .bar { position: absolute; left: 0; top: 0; width: 100%; height: 7mm; background: #2c5282; }
+  .kicker { color: #2b6cb0; font-size: 9pt; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2mm; }
+  h1 { font-size: 30pt; line-height: 1.08; margin: 0 0 4mm; color: #1a365d; }
+  h2 { font-size: 21pt; line-height: 1.1; margin: 0 0 4mm; color: #1a365d; }
+  h3 { font-size: 13pt; margin: 0 0 1.5mm; color: #2c5282; }
+  p, li { font-size: 12pt; line-height: 1.32; }
+  ul { margin: 0; padding-left: 5mm; }
+  li { margin-bottom: 1.6mm; }
+  .meta { color: #4a5568; font-size: 11pt; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+  .card { background: #ebf8ff; border-left: 2.5mm solid #3182ce; padding: 4mm 5mm; }
+  .card.warn { background: #fffaf0; border-left-color: #d69e2e; }
+  .card.bad { background: #fff5f5; border-left-color: #c53030; }
+  .card.good { background: #f0fff4; border-left-color: #38a169; }
+  .card p, .card li { font-size: 10.5pt; }
+  .big { font-size: 15pt; font-weight: bold; color: #1a365d; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 9.5pt; background: #f7fafc; padding: 0 1mm; }
+  .diagram { display: block; max-width: 100%; max-height: 145mm; margin: 0 auto; object-fit: contain; border: 0.5mm solid #cbd5e0; }
+  .footer { position: absolute; bottom: 6mm; left: 16mm; right: 16mm; color: #718096; font-size: 8.5pt; display: flex; justify-content: space-between; }
+  .callout { font-size: 13pt; background: #1a365d; color: #fff; padding: 3.5mm 5mm; margin-top: 4mm; }
+  .tiny { font-size: 9pt; color: #4a5568; }
+  .flow { display: flex; align-items: stretch; gap: 2mm; margin: 4mm 0; }
+  .step { flex: 1; background: #ebf8ff; border-top: 1.5mm solid #3182ce; padding: 3mm 2.5mm; font-size: 9.5pt; }
+  .step strong { display: block; font-size: 10.5pt; color: #1a365d; margin-bottom: 1mm; }
+  .split { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 9mm; }
+  .quote { font-size: 14pt; line-height: 1.35; color: #1a365d; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Capstone presentation - Track A</div>
+  <h1>KijaniKiosk<br>Staging-to-Production Release Path</h1>
+  <p class="meta">Dalton Wambui &nbsp;|&nbsp; v1.0.0 &nbsp;|&nbsp; feature/capstone-track-a</p>
+  <p class="meta">Repository: github.com/mwekundujohn-ship-it/kijaniosk-devops-foundation</p>
+  <div class="callout">One tested image. One approval gate. One evidence trail from commit to production.</div>
+  <div class="footer"><span>KijaniKiosk DevOps Foundation</span><span>1 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Problem and scope</div>
+  <h2>A deploy is not a release until it is proven</h2>
+  <div class="two">
+    <div>
+      <h3>Problem</h3>
+      <ul>
+        <li>Weekly work existed, but releases were not one repeatable path.</li>
+        <li>A green pipeline can still promote the wrong artifact.</li>
+        <li>Production needs a human decision with evidence, not just a command.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Track A deliverable</h3>
+      <ul>
+        <li>Terraform environments and private receipt buckets.</li>
+        <li>One Kustomize base, two environment overlays.</li>
+        <li>Jenkins verifies, builds once, smoke tests staging, gates production, promotes the same image.</li>
+        <li>Ansible applies and waits for rollout.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card warn" style="margin-top:6mm"><p><strong>Stated boundary:</strong> Week 10 serverless receipts are not implemented. The bucket and environment key are prepared and the gap is not hidden.</p></div>
+  <div class="footer"><span>Scope: docs/scope.pdf</span><span>2 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Architecture</div>
+  <h2>Every solid arrow is implemented and exercised</h2>
+  <img class="diagram" src="architecture.png" alt="Track A architecture">
+  <div class="footer"><span>Source: docs/architecture.dot; dashed red = not implemented or not evaluated</span><span>3 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Delivery</div>
+  <h2>The pipeline stops before the risk reaches production</h2>
+  <div class="flow">
+    <div class="step"><strong>Verify</strong>npm ci, lint, tests</div>
+    <div class="step"><strong>Build once</strong>Dockerfile.production</div>
+    <div class="step"><strong>Push</strong>local registry</div>
+    <div class="step"><strong>Staging</strong>apply, set image, rollout</div>
+    <div class="step"><strong>Smoke</strong>health + version + total=42</div>
+    <div class="step" style="background:#fff5f5;border-top-color:#c53030"><strong>Approve</strong>approver + reason</div>
+    <div class="step"><strong>Promote</strong>same image tag</div>
+    <div class="step"><strong>Prove</strong>production smoke</div>
+  </div>
+  <div class="two" style="margin-top:7mm">
+    <div class="card good"><p><strong>Design rule:</strong> build once, promote the same tag. Production never rebuilds from a different commit.</p></div>
+    <div class="card"><p><strong>Failure rule:</strong> staging smoke or version assertion fails before the approval gate. The operator never approves an unproven artifact.</p></div>
+  </div>
+  <div class="footer"><span>Pipeline: capstone/Jenkinsfile</span><span>4 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Infrastructure and configuration</div>
+  <h2>Same workload, different environment facts</h2>
+  <div class="three">
+    <div class="card"><h3>Terraform</h3><p>Creates both namespaces and separate private, versioned, SSE-S3 receipt buckets. State lives in S3, not in Git.</p></div>
+    <div class="card"><h3>Kustomize</h3><p>One base Deployment and Service. Overlays change namespace, replicas, labels, image placeholder, and ConfigMap values.</p></div>
+    <div class="card"><h3>Ansible</h3><p>Applies the overlay, then sets the exact image tag and waits for rollout. Apply alone is not a release.</p></div>
+  </div>
+  <table style="width:100%;border-collapse:collapse;margin-top:8mm;font-size:10pt">
+    <tr style="background:#ebf8ff"><th style="text-align:left;padding:2mm;border:0.4mm solid #a0aec0">Key</th><th style="text-align:left;padding:2mm;border:0.4mm solid #a0aec0">Staging</th><th style="text-align:left;padding:2mm;border:0.4mm solid #a0aec0">Production</th></tr>
+    <tr><td style="padding:2mm;border:0.4mm solid #a0aec0"><code>NODE_ENV</code></td><td style="padding:2mm;border:0.4mm solid #a0aec0">staging</td><td style="padding:2mm;border:0.4mm solid #a0aec0">production</td></tr>
+    <tr><td style="padding:2mm;border:0.4mm solid #a0aec0"><code>DB_HOST</code></td><td style="padding:2mm;border:0.4mm solid #a0aec0">...staging...</td><td style="padding:2mm;border:0.4mm solid #a0aec0">...production...</td></tr>
+    <tr><td style="padding:2mm;border:0.4mm solid #a0aec0"><code>RECEIPTS_BUCKET</code></td><td style="padding:2mm;border:0.4mm solid #a0aec0">staging bucket</td><td style="padding:2mm;border:0.4mm solid #a0aec0">production bucket</td></tr>
+    <tr><td style="padding:2mm;border:0.4mm solid #a0aec0"><code>APP_VERSION</code></td><td style="padding:2mm;border:0.4mm solid #a0aec0" colspan="2">Not in ConfigMap: baked into the immutable image</td></tr>
+  </table>
+  <div class="footer"><span>Environment separation without duplicated manifests</span><span>5 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Runtime and verification</div>
+  <h2>Kubernetes proves the process; the smoke test proves the release</h2>
+  <div class="two">
+    <div>
+      <h3>Runtime controls</h3>
+      <ul>
+        <li>2 staging replicas, 3 production replicas.</li>
+        <li>Non-root UID/GID 10001, read-only root filesystem, all capabilities dropped.</li>
+        <li>Readiness and liveness probes on <code>/health</code>.</li>
+        <li>Resource requests and limits.</li>
+        <li>ClusterIP Service on 3001 targeting named port <code>http</code>.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>What the smoke test asserts</h3>
+      <ul>
+        <li><code>status=ok</code> and <code>service=kk-payments</code>.</li>
+        <li>The served version equals the image tag being promoted.</li>
+        <li><code>POST /total</code> returns exactly 42 for two synthetic line items.</li>
+        <li>It polls during rollout so an old pod cannot make the test lie.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">A health check answers "is something running?" The release check answers "is the thing we built serving?"</div>
+  <div class="footer"><span>Deployment: capstone/k8s/base; smoke: capstone/scripts/smoke-test.sh</span><span>6 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Evidence</div>
+  <h2>Build #2: the full path completed</h2>
+  <div class="two">
+    <div class="card good">
+      <h3>Verified</h3>
+      <ul>
+        <li>Staging rollout and smoke test passed for <code>2.4.0-2a84c81</code>.</li>
+        <li>Human approval gate paused production.</li>
+        <li>Production rollout and smoke test passed.</li>
+        <li>Evidence archived by Jenkins.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Artefacts</h3>
+      <ul>
+        <li><code>capstone/evidence/jenkins-build-2/console.txt</code></li>
+        <li><code>staging-state.txt</code>, <code>production-state.txt</code></li>
+        <li><code>staging-configmap.txt</code></li>
+        <li>Live state: staging 2/2, production 3/3.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="tiny" style="margin-top:6mm">Demo adds: approval reason record, negative smoke-test failure, and pod self-healing. Text claims are paired with live commands, not only screenshots.</p>
+  <div class="footer"><span>Evidence: capstone/evidence/</span><span>7 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Key decision and correction</div>
+  <h2>The release tag is an assertion, not a label</h2>
+  <div class="two">
+    <div class="card bad">
+      <h3>What I got wrong first</h3>
+      <ul>
+        <li>The smoke test accepted any HTTP 200, so build #1 could pass against an old pod.</li>
+        <li>Ansible <code>apply -k</code> could reset the image to the overlay placeholder after Jenkins pushed the real tag.</li>
+        <li><code>APP_VERSION</code> was treated as runtime config instead of immutable build metadata.</li>
+      </ul>
+    </div>
+    <div class="card good">
+      <h3>What changed</h3>
+      <ul>
+        <li>Poll <code>/health</code> until the served version equals the image tag.</li>
+        <li><code>apply -k</code>, then <code>set image</code>, then <code>rollout status</code>.</li>
+        <li>Version is a Docker build argument, not a ConfigMap key.</li>
+        <li>Three issues tracked and closed with commit <code>2a84c81</code>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote" style="margin-top:8mm">"The command succeeded" and "the release is trustworthy" are different claims.</div>
+  <div class="footer"><span>Corrections: docs/ai-governance-log.md; issues #12-#14</span><span>8 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">AI governance</div>
+  <h2>AI assistance was reviewed, corrected, and recorded</h2>
+  <div class="three">
+    <div class="card"><h3>AI produced</h3><p>Drafts for the smoke test, Ansible tasks, and environment configuration.</p></div>
+    <div class="card bad"><h3>AI got wrong</h3><p>Accepted an old pod as healthy; let apply reset the image tag; put build metadata in a ConfigMap.</p></div>
+    <div class="card good"><h3>Human correction</h3><p>Version assertion, explicit set-image, immutable version. Each correction has a commit and a live check.</p></div>
+  </div>
+  <div class="card warn" style="margin-top:8mm"><p><strong>Governance rule:</strong> no fabricated peer review, no invented build results, no screenshot without a command behind it. The eight-field log records the prompt, output, error, correction, evidence, and checklist item.</p></div>
+  <div class="footer"><span>Log: docs/ai-governance-log.md</span><span>9 / 10</span></div>
+</section>
+
+<section class="slide">
+  <div class="bar"></div>
+  <div class="kicker">Production gaps and next steps</div>
+  <h2>What this is not, and what I would build next</h2>
+  <div class="two">
+    <div class="card warn">
+      <h3>Honest gaps</h3>
+      <ul>
+        <li>Production is a namespace in the same minikube cluster.</li>
+        <li>Week 10 receipt chain is not implemented.</li>
+        <li>PrometheusRule is validated but not evaluated.</li>
+        <li>DB_HOST is not consumed by a live database.</li>
+        <li>Pipeline uses pollSCM, not merge-to-main.</li>
+        <li>Peer review is still a self-review fallback.</li>
+      </ul>
+    </div>
+    <div class="card good">
+      <h3>Next iteration</h3>
+      <ul>
+        <li>Merge-to-main trigger with a PR gate.</li>
+        <li>Receipt producer writing to the staging bucket.</li>
+        <li>Prometheus Operator + kube-state-metrics and a fired alert.</li>
+        <li>External secret manager and registry signing.</li>
+        <li>Independent classmate review before submission.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">The value of the capstone is the evidence chain, not the list of tools.</div>
+  <div class="footer"><span>Reflection: docs/reflection.pdf</span><span>10 / 10</span></div>
+</section>
+
+</body>
+</html>

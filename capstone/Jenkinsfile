@@ -84,8 +84,28 @@ pipeline {
 
     stage('Approve production') {
       steps {
-        timeout(time: 15, unit: 'MINUTES') {
-          input message: "Deploy ${env.TAG} to production?", ok: 'Deploy'
+        script {
+          timeout(time: 15, unit: 'MINUTES') {
+            def approval = input(
+              message: "Deploy ${env.TAG} to production?",
+              ok: 'Deploy',
+              submitterParameter: 'APPROVER',
+              parameters: [
+                string(
+                  name: 'APPROVAL_REASON',
+                  defaultValue: 'Staging smoke test passed',
+                  description: 'Why is this release safe to promote to production?'
+                )
+              ]
+            )
+            env.APPROVER = approval['APPROVER'] ?: 'unknown'
+            env.APPROVAL_REASON = approval['APPROVAL_REASON'] ?: '(not supplied)'
+            echo "Production approved by ${env.APPROVER}: ${env.APPROVAL_REASON}"
+            writeFile(
+              file: 'capstone/evidence/approval.txt',
+              text: "approver=${env.APPROVER}\nreason=${env.APPROVAL_REASON}\ntag=${env.TAG}\n"
+            )
+          }
         }
       }
     }

@@ -8,6 +8,7 @@ configMapGenerator:
     literals:
       - NODE_ENV=staging
       - PORT=3001
+      - DB_HOST=kk-payments-db.kijani-staging.svc.cluster.local
       - RECEIPTS_BUCKET=kk-payments-receipts-staging-545572979505
       - LOG_LEVEL=debug
     options:

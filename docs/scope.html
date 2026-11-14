@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KijaniKiosk Capstone - Scope</title>
+<style>
+  @page { size: A4; margin: 13mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "DejaVu Sans", Arial, sans-serif; color: #1a202c; font-size: 9.2pt; line-height: 1.32; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; color: #1a365d; }
+  h2 { font-size: 11pt; margin: 3.2mm 0 1.2mm; color: #2c5282; border-bottom: 0.6pt solid #bee3f8; padding-bottom: 0.6mm; }
+  p { margin: 0 0 1.5mm; }
+  .meta { color: #4a5568; margin-bottom: 2.5mm; }
+  ol, ul { margin: 0 0 1.8mm; padding-left: 5mm; }
+  li { margin-bottom: 0.7mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  th, td { border: 0.5pt solid #a0aec0; padding: 1.1mm 1.6mm; vertical-align: top; text-align: left; }
+  th { background: #ebf8ff; }
+  .note { background: #fffaf0; border-left: 2.5pt solid #d69e2e; padding: 1.6mm 2.2mm; margin: 1.8mm 0; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.3pt; background: #f7fafc; padding: 0 0.6mm; }
+</style>
+</head>
+<body>
+<h1>KijaniKiosk Capstone - Scope and Success Criteria</h1>
+<p class="meta"><strong>Author:</strong> Dalton Wambui &nbsp;|&nbsp; <strong>Track:</strong> A - Infrastructure-first &nbsp;|&nbsp; <strong>Release:</strong> v1.0.0 &nbsp;|&nbsp; <strong>Repository:</strong> mwekundujohn-ship-it/kijaniosk-devops-foundation</p>
+
+<h2>Problem</h2>
+<p>KijaniKiosk can build the <code>kk-payments</code> service, but a release is not trustworthy unless the same tested image can move from staging to production through one repeatable, observable, permission-gated path. The capstone proves that infrastructure, configuration, deployment, smoke testing, approval, and runtime recovery are connected rather than separate weekly exercises.</p>
+
+<h2>In scope</h2>
+<ol>
+  <li>Terraform provisions the <code>kijani-staging</code> and <code>kijani-production</code> namespaces and separate private, versioned, SSE-S3 receipt buckets.</li>
+  <li>Kustomize renders one <code>kk-payments</code> Deployment and Service into both namespaces, with environment-specific ConfigMaps (<code>NODE_ENV</code>, <code>DB_HOST</code>, <code>RECEIPTS_BUCKET</code>, <code>LOG_LEVEL</code>) and replica counts.</li>
+  <li>Ansible applies the selected overlay, sets the image tag, and waits for the Kubernetes rollout.</li>
+  <li>Jenkins verifies the Week 5 application, builds and pushes the Week 8 production image, deploys staging, runs HTTP smoke tests, stops for human approval that records the approver and reason, then promotes the same image to production.</li>
+  <li>A PrometheusRule defines three <code>kk-payments</code> alerts for unavailable replicas, container restarts, and missing Service endpoints.</li>
+</ol>
+
+<h2>Out of scope</h2>
+<ul>
+  <li><strong>Week 10 serverless receipt chain.</strong> The Week 10 specification and function code are not available in this repository. The per-environment buckets and <code>RECEIPTS_BUCKET</code> key are prepared, but no serverless producer is claimed.</li>
+  <li><strong>Separate production cluster or AWS account.</strong> Production is a namespace in the same minikube cluster. This demonstrates promotion and isolation logic, not production-grade failure isolation.</li>
+  <li><strong>A live database.</strong> <code>DB_HOST</code> differs by environment, but no database workload is deployed and the Week 8 service does not query it.</li>
+  <li><strong>Live alert evaluation.</strong> The PrometheusRule requires the Prometheus Operator and kube-state-metrics; neither is installed, so the rule is syntax-checked but not firing.</li>
+</ul>
+
+<h2>Measurable success criteria</h2>
+<table>
+  <thead><tr><th style="width:42%">Criterion</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td>Terraform formats and validates</td><td><code>terraform fmt -check</code> and <code>terraform validate</code> pass</td></tr>
+    <tr><td>Both overlays render with different ConfigMaps</td><td><code>kubectl kustomize</code> output and rendered manifest evidence</td></tr>
+    <tr><td>Jenkins builds one image and promotes that same tag</td><td>Jenkins console shows one build/push and the same tag in both namespaces</td></tr>
+    <tr><td>Staging proves health before approval</td><td>Smoke test returns <code>status=ok</code>, the expected version, and <code>total=42</code></td></tr>
+    <tr><td>Human approval is recorded</td><td><code>capstone/evidence/approval.txt</code> contains approver, reason, and tag</td></tr>
+    <tr><td>Production serves the promoted image</td><td><code>kubectl</code> shows 3/3 ready; production smoke test passes</td></tr>
+    <tr><td>A pod fault self-heals</td><td>Deleted staging pod is recreated and the Deployment returns to 2/2 ready</td></tr>
+    <tr><td>Architecture and decisions are explainable</td><td>README, architecture diagram, AI governance log, slides, and oral drill</td></tr>
+  </tbody>
+</table>
+
+<div class="note"><strong>Architecture:</strong> delivered as <code>docs/architecture.png</code> (source: <code>docs/architecture.dot</code>). Solid arrows show implemented, exercised flows. Dashed red arrows show explicitly unimplemented or unevaluated scope.</div>
+</body>
+</html>
